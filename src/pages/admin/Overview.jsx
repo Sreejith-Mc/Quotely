@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../../supabaseClient.js';
 import { money } from '../../lib/calc.js';
 import { useToast } from '../../context/ToastContext.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
 import { useIsMobile } from '../../hooks/useIsMobile.js';
 
 const STATUSES = ['Draft', 'Sent', 'Accepted'];
@@ -9,26 +10,46 @@ const STATUSES = ['Draft', 'Sent', 'Accepted'];
 export default function Overview() {
   const toast = useToast();
   const isMobile = useIsMobile();
+  const { isAdmin, session } = useAuth();
+  const userId = session?.user?.id;
   const [stats, setStats] = useState(null);
   const [recent, setRecent] = useState([]);
   const [history, setHistory] = useState([]);
   const [editing, setEditing] = useState(null);
 
   const load = useCallback(async () => {
-    const [statRes, recentRes, histRes] = await Promise.all([
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+
+    // RLS already restricts employees to their own rows, but we also scope the
+    // queries explicitly so the stats and lists stay consistent.
+    let monthQ = supabase.from('quotations').select('grand_total').gte('created_at', monthStart.toISOString());
+    let recentQ = supabase.from('quotations').select('id,number,customer_name,grand_total,status,created_at').order('created_at', { ascending: false }).limit(8);
+    if (!isAdmin && userId) {
+      monthQ = monthQ.eq('sales_staff_id', userId);
+      recentQ = recentQ.eq('sales_staff_id', userId);
+    }
+
+    const [monthRes, statRes, recentRes, histRes] = await Promise.all([
+      monthQ,
       supabase.rpc('dashboard_stats'),
-      supabase.from('quotations').select('id,number,customer_name,grand_total,status,created_at').order('created_at', { ascending: false }).limit(8),
+      recentQ,
       supabase.from('quotation_audit').select('id,quotation_number,actor_name,action,created_at').order('created_at', { ascending: false }).limit(12),
     ]);
+
+    const monthRows = monthRes.data || [];
+    const count = monthRows.length;
+    const value = monthRows.reduce((sum, r) => sum + Number(r.grand_total || 0), 0);
     const s = statRes.data || {};
     setStats([
-      { label: 'Quotations · this month', value: String(s.monthCount ?? 0), delta: '' },
-      { label: 'Value Quoted', value: money(s.monthValue ?? 0), delta: '' },
+      { label: isAdmin ? 'Quotations · this month' : 'My quotations · this month', value: String(count), delta: '' },
+      { label: isAdmin ? 'Value Quoted' : 'Value I Quoted', value: money(value), delta: '' },
       { label: 'Active Employees', value: String(s.activeEmployees ?? 0), delta: `of ${s.totalEmployees ?? 0} total` },
     ]);
     setRecent(recentRes.data || []);
     setHistory(histRes.data || []);
-  }, []);
+  }, [isAdmin, userId]);
 
   useEffect(() => { load(); }, [load]);
 
