@@ -111,8 +111,9 @@ export default function QuoteSheet({ data }) {
         </div>
       </div>
 
-      {/* Terms + seal */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 30, marginTop: 34, alignItems: 'flex-end', flex: 1 }}>
+      {/* Terms + seal — margin-top:auto pins this block to the bottom of the A4 sheet
+          (reliable in both screen and print, unlike flex-grow). */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 30, marginTop: 'auto', paddingTop: 40, alignItems: 'flex-end' }}>
         <div style={{ flex: 1, maxWidth: 380 }}>
           <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.12em', color: tpl.acc, fontWeight: 700, marginBottom: 8 }}>Terms &amp; Conditions</div>
           <ol style={{ margin: 0, paddingLeft: 16, display: 'flex', flexDirection: 'column', gap: 5 }}>
