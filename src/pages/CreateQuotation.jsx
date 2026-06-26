@@ -118,23 +118,39 @@ export default function CreateQuotation() {
 
   useFitSheet(outerRef, wrapRef, innerRef, { maxScale: 1.05, margin: 36 });
 
-  function doPrint() {
-    // #print-root (full-size, off-screen) is what actually prints — see tokens.css.
-    setTimeout(() => window.print(), 60);
-  }
-  async function downloadPdf() {
-    // Render the off-screen, full-size A4 sheet straight to a PDF file — no print dialog.
+  function pdfWorker() {
     const el = document.getElementById('print-root')?.firstElementChild;
-    if (!el) { window.print(); return; }
+    if (!el) return null;
+    return html2pdf().set({
+      margin: 0,
+      filename: `${sheetData.quoteNo || 'Quotation'}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    }).from(el);
+  }
+
+  // Print prints the *exact* generated PDF (opened in a new tab with auto-print),
+  // so it always matches Download — never the browser's mis-scaled window.print().
+  function doPrint() {
+    const worker = pdfWorker();
+    if (!worker) { window.print(); return; }
+    const win = window.open('', '_blank'); // opened inside the click so it isn't blocked
+    toast('Preparing print…');
+    worker.toPdf().get('pdf').then((pdf) => {
+      pdf.autoPrint();
+      const url = pdf.output('bloburl');
+      if (win) win.location.href = url;
+      else window.print();
+    }).catch(() => { if (win) win.close(); window.print(); });
+  }
+
+  async function downloadPdf() {
+    const worker = pdfWorker();
+    if (!worker) { window.print(); return; }
     toast('Preparing PDF…');
     try {
-      await html2pdf().set({
-        margin: 0,
-        filename: `${sheetData.quoteNo || 'Quotation'}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      }).from(el).save();
+      await worker.save();
     } catch {
       toast('Could not generate PDF — opening print instead');
       window.print();
@@ -372,7 +388,7 @@ export default function CreateQuotation() {
         <QuoteSheet data={sheetData} printMode />
       </div>
 
-      <PdfOverlay open={pdfOpen} onClose={() => setPdfOpen(false)} sheetData={sheetData} onDownload={downloadPdf} onPrint={() => window.print()} />
+      <PdfOverlay open={pdfOpen} onClose={() => setPdfOpen(false)} sheetData={sheetData} onDownload={downloadPdf} onPrint={doPrint} />
       <SuccessOverlay
         open={!!success}
         number={success?.number}
