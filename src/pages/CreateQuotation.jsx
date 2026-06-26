@@ -116,8 +116,8 @@ export default function CreateQuotation() {
   useFitSheet(outerRef, wrapRef, innerRef, { maxScale: 1.05, margin: 36 });
 
   function doPrint() {
-    setPdfOpen(true);
-    setTimeout(() => window.print(), 200);
+    // #print-root (full-size, off-screen) is what actually prints — see tokens.css.
+    setTimeout(() => window.print(), 60);
   }
   function downloadPdf() {
     toast('Opening print dialog — choose "Save as PDF"');
@@ -342,6 +342,11 @@ export default function CreateQuotation() {
             {saving ? (editId ? 'Updating…' : 'Generating…') : (editId ? 'Update Quotation →' : 'Generate Quotation →')}
           </button>
         </div>
+      </div>
+
+      {/* Full-size, off-screen copy that the browser actually prints / saves as PDF. */}
+      <div id="print-root">
+        <QuoteSheet data={sheetData} />
       </div>
 
       <PdfOverlay open={pdfOpen} onClose={() => setPdfOpen(false)} sheetData={sheetData} onDownload={downloadPdf} onPrint={() => window.print()} />
