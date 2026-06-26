@@ -9,6 +9,7 @@ This app is a React + Vite SPA backed by Supabase (Postgres, Auth, Storage) and 
    - `0001_init.sql` — tables, RLS policies, `next_quote_number()`, and the `branding`/`avatars` storage buckets.
    - `0002_dashboard_audit.sql` — the activity/audit log, the audit trigger, and the `dashboard_stats()` function.
    - `0003_quotation_privacy.sql` — per-employee privacy (employees see only their own quotations + history; admins see all).
+   - `0004_quotation_delete.sql` — lets employees delete their own quotations (admins can delete any).
 3. In **Authentication > Providers**, make sure Email/Password sign-in is enabled.
 4. Create your first admin account:
    - In **Authentication > Users**, click "Add user" and create yourself with email + password (set "Auto Confirm User" on).

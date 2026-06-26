@@ -62,6 +62,14 @@ export default function Overview() {
     load();
   }
 
+  async function deleteQuote(q) {
+    if (!window.confirm(`Delete ${q.number}? This cannot be undone.`)) return;
+    const { error } = await supabase.from('quotations').delete().eq('id', q.id);
+    if (error) { toast('Could not delete quotation'); return; }
+    toast(`${q.number} deleted`);
+    load();
+  }
+
   if (!stats) return null;
 
   return (
@@ -81,13 +89,13 @@ export default function Overview() {
         <div style={{ background: 'var(--panel)', border: '1px solid var(--border)', borderRadius: 16, boxShadow: 'var(--shadow)', overflow: 'hidden' }}>
           <div style={{ padding: '16px 18px', borderBottom: '1px solid var(--border)', font: '700 14px Manrope' }}>Recent Quotations</div>
           <div style={{ overflowX: 'auto' }}>
-            <div style={{ minWidth: 520 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '110px 1fr 110px 130px 60px', padding: '11px 18px', font: '600 10px Manrope', color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid var(--border)' }}>
+            <div style={{ minWidth: 540 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '110px 1fr 110px 130px 86px', padding: '11px 18px', font: '600 10px Manrope', color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid var(--border)' }}>
                 <div>Number</div><div>Customer</div><div style={{ textAlign: 'right' }}>Amount</div><div>Status</div><div></div>
               </div>
               {recent.length === 0 && <div style={{ padding: '24px 18px', color: 'var(--ink-3)', font: '500 13px Manrope' }}>No quotations yet.</div>}
               {recent.map((q) => (
-                <div key={q.id} style={{ display: 'grid', gridTemplateColumns: '110px 1fr 110px 130px 60px', padding: '11px 18px', alignItems: 'center', borderBottom: '1px solid var(--border)', fontSize: 13, gap: 6 }}>
+                <div key={q.id} style={{ display: 'grid', gridTemplateColumns: '110px 1fr 110px 130px 86px', padding: '11px 18px', alignItems: 'center', borderBottom: '1px solid var(--border)', fontSize: 13, gap: 6 }}>
                   <div style={{ font: "600 12px 'JetBrains Mono'", color: 'var(--green)' }}>{q.number}</div>
                   <div style={{ fontWeight: 600, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q.customer_name}</div>
                   <div style={{ textAlign: 'right', fontFamily: "'JetBrains Mono'" }}>{money(q.grand_total)}</div>
@@ -96,8 +104,9 @@ export default function Overview() {
                       {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
+                  <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
                     <button onClick={() => navigate(`/edit/${q.id}`)} title="Edit" style={{ border: '1px solid var(--border)', background: 'var(--panel)', color: 'var(--ink-2)', cursor: 'pointer', borderRadius: 8, padding: '5px 9px', font: '600 12px Manrope' }}>✎</button>
+                    <button onClick={() => deleteQuote(q)} title="Delete" style={{ border: '1px solid var(--border)', background: 'var(--panel)', color: 'var(--maroon)', cursor: 'pointer', borderRadius: 8, padding: '5px 9px', font: '600 12px Manrope' }}>🗑</button>
                   </div>
                 </div>
               ))}
