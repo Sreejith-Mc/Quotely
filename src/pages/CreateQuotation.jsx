@@ -11,6 +11,7 @@ import PdfOverlay from '../components/PdfOverlay.jsx';
 import SuccessOverlay from '../components/SuccessOverlay.jsx';
 import { useFitSheet } from '../hooks/useFitSheet.js';
 import { useIsMobile } from '../hooks/useIsMobile.js';
+import html2pdf from 'html2pdf.js';
 
 let uidCounter = 1;
 
@@ -121,9 +122,23 @@ export default function CreateQuotation() {
     // #print-root (full-size, off-screen) is what actually prints — see tokens.css.
     setTimeout(() => window.print(), 60);
   }
-  function downloadPdf() {
-    toast('Opening print dialog — choose "Save as PDF"');
-    setTimeout(() => window.print(), 250);
+  async function downloadPdf() {
+    // Render the off-screen, full-size A4 sheet straight to a PDF file — no print dialog.
+    const el = document.getElementById('print-root')?.firstElementChild;
+    if (!el) { window.print(); return; }
+    toast('Preparing PDF…');
+    try {
+      await html2pdf().set({
+        margin: 0,
+        filename: `${sheetData.quoteNo || 'Quotation'}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      }).from(el).save();
+    } catch {
+      toast('Could not generate PDF — opening print instead');
+      window.print();
+    }
   }
 
   async function generate() {

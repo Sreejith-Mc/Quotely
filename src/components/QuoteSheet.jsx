@@ -11,7 +11,9 @@ export default function QuoteSheet({ data, printMode }) {
         // print copy uses physical mm so it always fills an exact A4 page regardless
         // of the OS display scaling / printer DPI.
         width: printMode ? '210mm' : 794,
-        minHeight: printMode ? '297mm' : 1123,
+        // 296mm (just under A4's 297mm) avoids a sub-pixel overflow that would add a
+        // blank second page when rasterised to PDF; still fills the page visually.
+        minHeight: printMode ? '296mm' : 1123,
         background: '#ffffff', color: '#16201b',
         fontFamily: tpl.font, padding: '52px 52px 40px', boxSizing: 'border-box',
         position: 'relative', display: 'flex', flexDirection: 'column',
