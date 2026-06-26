@@ -40,6 +40,7 @@ export default function App() {
       {showHeader && <Header />}
       <Routes>
         <Route path="/" element={<CreateQuotation />} />
+        <Route path="/edit/:id" element={<RequireAuth><CreateQuotation /></RequireAuth>} />
         <Route path="/login" element={<Login />} />
         <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
         {/* Dashboard (overview) is open to any signed-in user; the rest is admin-only. */}

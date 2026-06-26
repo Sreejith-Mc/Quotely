@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../supabaseClient.js';
 import { money } from '../../lib/calc.js';
 import { useToast } from '../../context/ToastContext.jsx';
@@ -9,13 +10,13 @@ const STATUSES = ['Draft', 'Sent', 'Accepted'];
 
 export default function Overview() {
   const toast = useToast();
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { isAdmin, session } = useAuth();
   const userId = session?.user?.id;
   const [stats, setStats] = useState(null);
   const [recent, setRecent] = useState([]);
   const [history, setHistory] = useState([]);
-  const [editing, setEditing] = useState(null);
 
   const load = useCallback(async () => {
     const monthStart = new Date();
@@ -61,14 +62,6 @@ export default function Overview() {
     load();
   }
 
-  async function saveEdit(patch) {
-    const { error } = await supabase.from('quotations').update(patch).eq('id', editing.id);
-    if (error) { toast('Could not save changes'); return; }
-    setEditing(null);
-    toast(`${editing.number} updated`);
-    load();
-  }
-
   if (!stats) return null;
 
   return (
@@ -104,7 +97,7 @@ export default function Overview() {
                     </select>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <button onClick={() => setEditing(q)} title="Edit" style={{ border: '1px solid var(--border)', background: 'var(--panel)', color: 'var(--ink-2)', cursor: 'pointer', borderRadius: 8, padding: '5px 9px', font: '600 12px Manrope' }}>✎</button>
+                    <button onClick={() => navigate(`/edit/${q.id}`)} title="Edit" style={{ border: '1px solid var(--border)', background: 'var(--panel)', color: 'var(--ink-2)', cursor: 'pointer', borderRadius: 8, padding: '5px 9px', font: '600 12px Manrope' }}>✎</button>
                   </div>
                 </div>
               ))}
@@ -133,37 +126,7 @@ export default function Overview() {
         </div>
       </div>
 
-      {editing && <EditModal q={editing} onClose={() => setEditing(null)} onSave={saveEdit} />}
     </>
-  );
-}
-
-function EditModal({ q, onClose, onSave }) {
-  const [name, setName] = useState(q.customer_name || '');
-  const [grand, setGrand] = useState(q.grand_total ?? 0);
-  const [status, setStatus] = useState(q.status);
-
-  return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 16 }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: 'var(--panel)', borderRadius: 16, padding: 24, boxShadow: 'var(--shadow)' }}>
-        <div style={{ font: '800 17px Manrope', marginBottom: 2 }}>Edit Quotation</div>
-        <div style={{ font: "600 12px 'JetBrains Mono'", color: 'var(--green)', marginBottom: 16 }}>{q.number}</div>
-
-        <label style={labelStyle}>Customer Name</label>
-        <input value={name} onChange={(e) => setName(e.target.value)} style={{ ...fieldStyle, marginBottom: 12 }} />
-        <label style={labelStyle}>Grand Total (₹)</label>
-        <input value={grand} onChange={(e) => setGrand(e.target.value)} inputMode="numeric" style={{ ...fieldStyle, marginBottom: 12, fontFamily: "'JetBrains Mono'" }} />
-        <label style={labelStyle}>Status</label>
-        <select value={status} onChange={(e) => setStatus(e.target.value)} style={{ ...fieldStyle, marginBottom: 4 }}>
-          {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-        </select>
-
-        <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
-          <button onClick={onClose} style={{ flex: 1, border: '1px solid var(--border)', background: 'transparent', color: 'var(--ink-2)', cursor: 'pointer', font: '700 13px Manrope', padding: 11, borderRadius: 11 }}>Cancel</button>
-          <button onClick={() => onSave({ customer_name: name, grand_total: parseFloat(grand) || 0, status })} style={{ flex: 1, border: 'none', background: 'var(--green)', color: '#fff', cursor: 'pointer', font: '700 13px Manrope', padding: 11, borderRadius: 11 }}>Save changes</button>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -186,5 +149,3 @@ function timeAgo(iso) {
 }
 
 const statusSelectStyle = { border: 'none', cursor: 'pointer', font: '600 11px Manrope', padding: '5px 8px', borderRadius: 20, outline: 'none', appearance: 'none', textAlign: 'center', width: '100%' };
-const labelStyle = { font: '600 11px Manrope', color: 'var(--ink-2)', display: 'block', marginBottom: 5 };
-const fieldStyle = { width: '100%', boxSizing: 'border-box', padding: '10px 12px', border: '1px solid var(--border)', background: 'var(--field)', color: 'var(--ink)', borderRadius: 10, font: '500 13px Manrope', outline: 'none' };

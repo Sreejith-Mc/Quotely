@@ -59,7 +59,7 @@ export default function Header() {
             )}
           </button>
         ) : (
-          <button onClick={() => navigate('/login?as=admin')} style={{ border: 'none', cursor: 'pointer', font: '700 13px Manrope', padding: '9px 16px', borderRadius: 10, background: 'var(--green)', color: '#fff', marginLeft: 2 }}>Admin Login</button>
+          <button onClick={() => navigate('/login')} style={{ border: 'none', cursor: 'pointer', font: '700 13px Manrope', padding: '9px 16px', borderRadius: 10, background: 'var(--green)', color: '#fff', marginLeft: 2 }}>Login</button>
         )}
 
         {menuOpen && (

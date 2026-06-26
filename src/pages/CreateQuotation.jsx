@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useSettings } from '../context/SettingsContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
@@ -16,6 +16,7 @@ let uidCounter = 1;
 
 export default function CreateQuotation() {
   const navigate = useNavigate();
+  const { id: editId } = useParams();
   const { loggedIn, profile, session } = useAuth();
   const { company, tax, numbering, terms, template, reload } = useSettings();
   const toast = useToast();
@@ -29,14 +30,51 @@ export default function CreateQuotation() {
   const [pdfOpen, setPdfOpen] = useState(false);
   const [success, setSuccess] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [editMeta, setEditMeta] = useState(null);
 
   const outerRef = useRef(null);
   const wrapRef = useRef(null);
   const innerRef = useRef(null);
 
-  const salesStaff = loggedIn && profile ? profile.name : 'Not Assigned';
-  const quoteNoPreview = formatQuoteNumber(numbering.prefix, numbering.next_number, numbering.pad);
-  const today = todayStr();
+  // Edit mode: load the existing quotation and prefill the builder.
+  useEffect(() => {
+    if (!editId) return;
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase.from('quotations').select('*').eq('id', editId).single();
+      if (cancelled) return;
+      if (error || !data) {
+        toast('Could not load that quotation');
+        navigate('/admin/overview');
+        return;
+      }
+      setCust({
+        name: data.customer_name || '', company: data.customer_company || '', address: data.customer_address || '',
+        phone: data.customer_phone || '', email: data.customer_email || '',
+      });
+      const loaded = Array.isArray(data.items) ? data.items : [];
+      let maxId = 0;
+      const normalized = loaded.map((it, i) => {
+        const id = typeof it.id === 'number' ? it.id : i + 1;
+        if (id > maxId) maxId = id;
+        return { ...it, id };
+      });
+      uidCounter = Math.max(uidCounter, maxId + 1);
+      setItems(normalized);
+      setManualGst(!!data.manual_gst);
+      setShowAmount(data.show_amount !== false);
+      setEditMeta({ number: data.number, date: data.date, status: data.status, salesName: data.sales_staff_name });
+    })();
+    return () => { cancelled = true; };
+  }, [editId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const salesStaff = editId ? (editMeta?.salesName || 'Not Assigned') : (loggedIn && profile ? profile.name : 'Not Assigned');
+  const quoteNoPreview = editId && editMeta
+    ? editMeta.number
+    : formatQuoteNumber(numbering.prefix, numbering.next_number, numbering.pad);
+  const today = editId && editMeta?.date
+    ? new Date(editMeta.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+    : todayStr();
 
   function addItem() {
     setItems((arr) => [...arr, { id: uidCounter++, name: '', qty: 1, total: 0 }]);
@@ -100,18 +138,8 @@ export default function CreateQuotation() {
       toast('Add at least one item');
       return;
     }
-    setSaving(true);
-    const { data: number, error: numErr } = await supabase.rpc('next_quote_number');
-    if (numErr) {
-      toast('Could not generate quotation — try again');
-      setSaving(false);
-      return;
-    }
     const t = sheetData._totals;
-    const { error: insErr } = await supabase.from('quotations').insert({
-      number,
-      sales_staff_id: session.user.id,
-      sales_staff_name: profile?.name || 'Not Assigned',
+    const fields = {
       customer_name: cust.name,
       customer_company: cust.company,
       customer_address: cust.address,
@@ -124,6 +152,33 @@ export default function CreateQuotation() {
       cgst_total: t.cgstT,
       sgst_total: t.sgstT,
       grand_total: t.grand,
+    };
+    setSaving(true);
+
+    // Edit mode → update the existing quotation (keeps its number, date, status).
+    if (editId) {
+      const { error: updErr } = await supabase.from('quotations').update(fields).eq('id', editId);
+      setSaving(false);
+      if (updErr) {
+        toast('Could not update quotation');
+        return;
+      }
+      await reload();
+      setSuccess({ number: editMeta?.number, grandTotal: money(t.grand), updated: true });
+      return;
+    }
+
+    const { data: number, error: numErr } = await supabase.rpc('next_quote_number');
+    if (numErr) {
+      toast('Could not generate quotation — try again');
+      setSaving(false);
+      return;
+    }
+    const { error: insErr } = await supabase.from('quotations').insert({
+      number,
+      sales_staff_id: session.user.id,
+      sales_staff_name: profile?.name || 'Not Assigned',
+      ...fields,
     });
     setSaving(false);
     if (insErr) {
@@ -150,8 +205,8 @@ export default function CreateQuotation() {
       {/* LEFT: builder */}
       <div style={{ padding: isMobile ? 16 : 24, overflow: isMobile ? 'visible' : 'auto', maxHeight: isMobile ? 'none' : 'calc(100vh - 62px)', display: 'flex', flexDirection: 'column', gap: 16 }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em' }}>New Quotation</h1>
-          <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--ink-2)' }}>Fill in the details — the document on the right updates live.</p>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em' }}>{editId ? 'Edit Quotation' : 'New Quotation'}</h1>
+          <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--ink-2)' }}>{editId ? `Editing ${editMeta?.number || ''} — saving updates this quotation.` : 'Fill in the details — the document on the right updates live.'}</p>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
@@ -284,13 +339,20 @@ export default function CreateQuotation() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isMobile ? '12px 16px' : '12px 22px', borderTop: '1px solid var(--border)', background: 'var(--panel)', flexWrap: 'wrap', gap: 10 }}>
           <span style={{ font: '500 11px Manrope', color: 'var(--ink-3)' }}>Fits to view · exported as pixel-perfect A4 PDF</span>
           <button onClick={generate} disabled={saving} style={{ ...primaryBtnStyle, padding: '10px 20px', borderRadius: 11, fontSize: 13, opacity: saving ? 0.7 : 1, flex: isMobile ? 1 : undefined }}>
-            {saving ? 'Generating…' : 'Generate Quotation →'}
+            {saving ? (editId ? 'Updating…' : 'Generating…') : (editId ? 'Update Quotation →' : 'Generate Quotation →')}
           </button>
         </div>
       </div>
 
       <PdfOverlay open={pdfOpen} onClose={() => setPdfOpen(false)} sheetData={sheetData} onDownload={downloadPdf} onPrint={() => window.print()} />
-      <SuccessOverlay open={!!success} number={success?.number} grandTotal={success?.grandTotal} onClose={() => setSuccess(null)} onNewQuote={newQuote} />
+      <SuccessOverlay
+        open={!!success}
+        number={success?.number}
+        grandTotal={success?.grandTotal}
+        updated={!!success?.updated}
+        onClose={() => setSuccess(null)}
+        onNewQuote={() => { if (editId) { navigate('/admin/overview'); } else { newQuote(); } }}
+      />
     </div>
   );
 }
