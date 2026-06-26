@@ -26,6 +26,7 @@ export default function CreateQuotation() {
   const [items, setItems] = useState([]);
   const [manualGst, setManualGst] = useState(false);
   const [showAmount, setShowAmount] = useState(true);
+  const [showRate, setShowRate] = useState(true);
   const [custOpen, setCustOpen] = useState(true);
   const [pdfOpen, setPdfOpen] = useState(false);
   const [success, setSuccess] = useState(null);
@@ -63,6 +64,7 @@ export default function CreateQuotation() {
       setItems(normalized);
       setManualGst(!!data.manual_gst);
       setShowAmount(data.show_amount !== false);
+      setShowRate(data.show_rate !== false);
       setEditMeta({ number: data.number, date: data.date, status: data.status, salesName: data.sales_staff_name });
     })();
     return () => { cancelled = true; };
@@ -109,9 +111,9 @@ export default function CreateQuotation() {
   }
 
   const sheetData = useMemo(() => buildSheetData({
-    company, cust, items, tax, manualGst, showAmount, terms: terms.content || '', templateId: template.selected,
+    company, cust, items, tax, manualGst, showAmount, showRate, terms: terms.content || '', templateId: template.selected,
     quoteNo: quoteNoPreview, date: today, salesStaff,
-  }), [company, cust, items, tax, manualGst, showAmount, terms, template, quoteNoPreview, today, salesStaff]);
+  }), [company, cust, items, tax, manualGst, showAmount, showRate, terms, template, quoteNoPreview, today, salesStaff]);
 
   useFitSheet(outerRef, wrapRef, innerRef, { maxScale: 1.05, margin: 36 });
 
@@ -148,6 +150,7 @@ export default function CreateQuotation() {
       items,
       manual_gst: manualGst,
       show_amount: showAmount,
+      show_rate: showRate,
       subtotal: t.subBase,
       cgst_total: t.cgstT,
       sgst_total: t.sgstT,
@@ -316,11 +319,15 @@ export default function CreateQuotation() {
       {/* RIGHT (desktop) / BOTTOM (mobile): quote template preview */}
       <div style={{ background: 'var(--bg)', borderLeft: isMobile ? 'none' : '1px solid var(--border)', borderTop: isMobile ? '1px solid var(--border)' : 'none', display: 'flex', flexDirection: 'column', maxHeight: isMobile ? 'none' : 'calc(100vh - 62px)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isMobile ? '12px 16px' : '14px 22px', borderBottom: '1px solid var(--border)', background: 'var(--panel)', flexWrap: 'wrap', gap: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
             <span style={{ font: '700 13px Manrope', color: 'var(--ink)' }}>Live Preview</span>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 7, cursor: 'pointer', userSelect: 'none' }}>
-              <Switch on={showAmount} onClick={() => setShowAmount((v) => !v)} small />
-              <span style={{ font: '600 11px Manrope', color: 'var(--ink-2)' }}>Show amounts</span>
+            <label style={checkLabelStyle}>
+              <input type="checkbox" checked={showRate} onChange={(e) => setShowRate(e.target.checked)} style={checkboxStyle} />
+              <span style={checkTextStyle}>Show rate</span>
+            </label>
+            <label style={{ ...checkLabelStyle, opacity: showRate ? 1 : 0.45, cursor: showRate ? 'pointer' : 'not-allowed' }}>
+              <input type="checkbox" checked={showAmount} disabled={!showRate} onChange={(e) => setShowAmount(e.target.checked)} style={checkboxStyle} />
+              <span style={checkTextStyle}>Show amount</span>
             </label>
           </div>
           <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
@@ -441,5 +448,8 @@ const subLabelStyle = { font: '600 9px Manrope', color: 'var(--ink-3)', textTran
 const delBtnStyle = { width: 30, height: 30, flexShrink: 0, border: 'none', background: 'transparent', color: 'var(--ink-3)', cursor: 'pointer', borderRadius: 8, fontSize: 15 };
 const addItemBtnStyle = { flex: 1, border: '1.5px dashed var(--green)', background: 'var(--green-soft)', color: 'var(--green)', cursor: 'pointer', font: '700 13px Manrope', padding: 11, borderRadius: 11 };
 const clearBtnStyle = { border: '1px solid var(--border)', background: 'var(--panel)', color: 'var(--ink-2)', cursor: 'pointer', font: '600 13px Manrope', padding: '11px 16px', borderRadius: 11 };
+const checkLabelStyle = { display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', userSelect: 'none' };
+const checkboxStyle = { width: 15, height: 15, accentColor: 'var(--green)', cursor: 'pointer' };
+const checkTextStyle = { font: '600 11px Manrope', color: 'var(--ink-2)' };
 const ghostBtnStyle = { border: '1px solid var(--border)', background: 'var(--panel)', color: 'var(--ink)', cursor: 'pointer', font: '600 12px Manrope', padding: '8px 13px', borderRadius: 9 };
 const primaryBtnStyle = { border: 'none', background: 'var(--green)', color: '#fff', cursor: 'pointer', font: '700 12px Manrope', padding: '8px 14px', borderRadius: 9 };

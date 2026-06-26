@@ -59,9 +59,9 @@ export default function QuoteSheet({ data }) {
           <div>#</div>
           <div style={{ minWidth: 0 }}>Item</div>
           <div style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>Qty</div>
-          <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>Rate</div>
-          <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>{data.cgstLabel}</div>
-          <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>{data.sgstLabel}</div>
+          {data.showRate && <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>Rate</div>}
+          {data.showRate && <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>{data.cgstLabel}</div>}
+          {data.showRate && <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>{data.sgstLabel}</div>}
           {data.showAmount && <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>Amount</div>}
         </div>
 
@@ -72,9 +72,9 @@ export default function QuoteSheet({ data }) {
                 <div style={{ color: '#9aa39c', fontFamily: tpl.mono, fontSize: 11 }}>{item.idx}</div>
                 <div style={{ fontWeight: 600, color: '#16201b', minWidth: 0, overflowWrap: 'anywhere' }}>{item.name}</div>
                 <div style={{ textAlign: 'center', fontFamily: tpl.mono, color: '#4a564e', whiteSpace: 'nowrap' }}>{item.qty}</div>
-                <div style={{ textAlign: 'right', fontFamily: tpl.mono, color: '#4a564e', whiteSpace: 'nowrap' }}>{item.rate}</div>
-                <div style={{ textAlign: 'right', fontFamily: tpl.mono, color: '#4a564e', whiteSpace: 'nowrap' }}>{item.cgst}</div>
-                <div style={{ textAlign: 'right', fontFamily: tpl.mono, color: '#4a564e', whiteSpace: 'nowrap' }}>{item.sgst}</div>
+                {data.showRate && <div style={{ textAlign: 'right', fontFamily: tpl.mono, color: '#4a564e', whiteSpace: 'nowrap' }}>{item.rate}</div>}
+                {data.showRate && <div style={{ textAlign: 'right', fontFamily: tpl.mono, color: '#4a564e', whiteSpace: 'nowrap' }}>{item.cgst}</div>}
+                {data.showRate && <div style={{ textAlign: 'right', fontFamily: tpl.mono, color: '#4a564e', whiteSpace: 'nowrap' }}>{item.sgst}</div>}
                 {data.showAmount && <div style={{ textAlign: 'right', fontFamily: tpl.mono, fontWeight: 600, color: '#16201b', whiteSpace: 'nowrap' }}>{item.total}</div>}
               </div>
             ))}
@@ -87,15 +87,19 @@ export default function QuoteSheet({ data }) {
       {/* Summary */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 22 }}>
         <div style={{ width: 320 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '6px 0', color: '#4a564e' }}>
-            <span>Subtotal</span><span style={{ fontFamily: tpl.mono }}>{data.subtotal}</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '6px 0', color: '#4a564e', borderTop: '1px solid #eef1ee' }}>
-            <span>{data.cgstLabel}</span><span style={{ fontFamily: tpl.mono }}>{data.cgstTotal}</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '6px 0', color: '#4a564e', borderTop: '1px solid #eef1ee' }}>
-            <span>{data.sgstLabel}</span><span style={{ fontFamily: tpl.mono }}>{data.sgstTotal}</span>
-          </div>
+          {data.showBreakdown && (
+            <>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '6px 0', color: '#4a564e' }}>
+                <span>Subtotal</span><span style={{ fontFamily: tpl.mono }}>{data.subtotal}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '6px 0', color: '#4a564e', borderTop: '1px solid #eef1ee' }}>
+                <span>{data.cgstLabel}</span><span style={{ fontFamily: tpl.mono }}>{data.cgstTotal}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '6px 0', color: '#4a564e', borderTop: '1px solid #eef1ee' }}>
+                <span>{data.sgstLabel}</span><span style={{ fontFamily: tpl.mono }}>{data.sgstTotal}</span>
+              </div>
+            </>
+          )}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, padding: '13px 16px', background: tpl.accSoft, borderRadius: 10 }}>
             <span style={{ fontSize: 13, fontWeight: 700, color: tpl.acc }}>Grand Total</span>
             <span style={{ fontFamily: tpl.mono, fontSize: 17, fontWeight: 700, color: tpl.acc }}>{data.grandTotal}</span>

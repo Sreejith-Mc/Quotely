@@ -3,14 +3,19 @@ import { TEMPLATES } from '../components/templates.js';
 
 // Builds the single `data` object the QuoteSheet component renders from — shared by
 // the inline live preview, the PDF overlay, and print so they can never drift apart.
-export function buildSheetData({ company, cust, items, tax, manualGst, showAmount, terms, templateId, quoteNo, date, salesStaff }) {
+export function buildSheetData({ company, cust, items, tax, manualGst, showAmount, showRate, terms, templateId, quoteNo, date, salesStaff }) {
   const cgstLabel = `CGST (${tax.cgst}%)`;
   const sgstLabel = `SGST (${tax.sgst}%)`;
+  // "Show rate" off → a minimal quote: only #, Item, Qty in the table and only the
+  // Grand Total in the summary. "Show amount" only applies when rates are shown.
+  const showRateCols = showRate !== false;
+  const showAmountCol = showRateCols && showAmount;
   // Numeric columns are sized to their content (auto) so large amounts never overlap;
   // the item-name column (minmax) absorbs the remaining width and shrinks if needed.
-  const gridCols = showAmount
-    ? '22px minmax(70px,1fr) auto auto auto auto auto'
-    : '22px minmax(90px,1fr) auto auto auto auto';
+  const cols = ['22px', 'minmax(90px,1fr)', 'auto']; // #, item, qty
+  if (showRateCols) cols.push('auto', 'auto', 'auto'); // rate, cgst, sgst
+  if (showAmountCol) cols.push('auto'); // amount
+  const gridCols = cols.join(' ');
   const tpl = TEMPLATES[templateId] || TEMPLATES.emerald;
 
   let subBase = 0, cgstT = 0, sgstT = 0, grand = 0;
@@ -33,7 +38,8 @@ export function buildSheetData({ company, cust, items, tax, manualGst, showAmoun
     },
     items: rowsOut,
     hasItems: rowsOut.length > 0, noItems: rowsOut.length === 0,
-    showAmount, gridCols, tpl, cgstLabel, sgstLabel,
+    showAmount: showAmountCol, showRate: showRateCols, showBreakdown: showRateCols,
+    gridCols, tpl, cgstLabel, sgstLabel,
     subtotal: money(subBase), cgstTotal: money(cgstT), sgstTotal: money(sgstT), grandTotal: money(grand),
     grandWords: grandTotalWords(grand),
     terms: terms.split('\n').filter((x) => x.trim()).map((t) => ({ text: t })),
