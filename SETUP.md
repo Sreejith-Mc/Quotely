@@ -5,7 +5,9 @@ This app is a React + Vite SPA backed by Supabase (Postgres, Auth, Storage) and 
 ## 1. Create the Supabase project
 
 1. Create a project at https://supabase.com.
-2. Open **SQL Editor** and run the entire contents of `supabase/migrations/0001_init.sql`. This creates all tables, RLS policies, the `next_quote_number()` function, and the `branding`/`avatars` storage buckets with their policies.
+2. Open **SQL Editor** and run the migration files in `supabase/migrations/` **in order**, one at a time:
+   - `0001_init.sql` — tables, RLS policies, `next_quote_number()`, and the `branding`/`avatars` storage buckets.
+   - `0002_dashboard_audit.sql` — the activity/audit log, shared dashboard visibility, and the `dashboard_stats()` function.
 3. In **Authentication > Providers**, make sure Email/Password sign-in is enabled.
 4. Create your first admin account:
    - In **Authentication > Users**, click "Add user" and create yourself with email + password (set "Auto Confirm User" on).

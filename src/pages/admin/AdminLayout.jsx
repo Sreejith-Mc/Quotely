@@ -16,15 +16,17 @@ const NAV = [
 
 export default function AdminLayout() {
   const { pathname } = useLocation();
-  const { profile } = useAuth();
+  const { profile, isAdmin } = useAuth();
   const isMobile = useIsMobile();
+  // Employees only get the Dashboard tab; admins get everything.
+  const nav = isAdmin ? NAV : NAV.filter(([id]) => id === 'overview');
   const active = NAV.find(([id]) => pathname.endsWith(id)) || NAV[0];
 
   if (isMobile) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 62px)' }}>
         <nav style={{ display: 'flex', gap: 6, overflowX: 'auto', borderBottom: '1px solid var(--border)', background: 'var(--panel)', padding: '10px 12px', WebkitOverflowScrolling: 'touch' }}>
-          {NAV.map(([id, label, icon]) => (
+          {nav.map(([id, label, icon]) => (
             <NavLink key={id} to={id} style={({ isActive }) => ({ ...navStyle(isActive), padding: '8px 12px', whiteSpace: 'nowrap', flexShrink: 0 })}>
               <span style={{ width: 16, textAlign: 'center' }}>{icon}</span>{label}
             </NavLink>
@@ -44,14 +46,14 @@ export default function AdminLayout() {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '232px 1fr', minHeight: 'calc(100vh - 62px)' }}>
       <aside style={{ borderRight: '1px solid var(--border)', background: 'var(--panel)', padding: '18px 12px', display: 'flex', flexDirection: 'column', gap: 3 }}>
-        <div style={{ font: '700 10px Manrope', color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '6px 12px 8px' }}>Admin</div>
-        {NAV.map(([id, label, icon]) => (
+        <div style={{ font: '700 10px Manrope', color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '6px 12px 8px' }}>{isAdmin ? 'Admin' : 'Workspace'}</div>
+        {nav.map(([id, label, icon]) => (
           <NavLink key={id} to={id} style={({ isActive }) => navStyle(isActive)}>
             <span style={{ width: 18, textAlign: 'center' }}>{icon}</span>{label}
           </NavLink>
         ))}
         <div style={{ marginTop: 'auto', padding: 12, borderTop: '1px solid var(--border)' }}>
-          <div style={{ font: '600 11px Manrope', color: 'var(--ink-2)' }}>Signed in as Admin</div>
+          <div style={{ font: '600 11px Manrope', color: 'var(--ink-2)' }}>Signed in as {isAdmin ? 'Admin' : 'Employee'}</div>
           <div style={{ font: '500 11px Manrope', color: 'var(--ink-3)', marginTop: 2 }}>{profile?.email}</div>
         </div>
       </aside>
