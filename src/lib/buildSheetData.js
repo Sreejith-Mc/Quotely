@@ -6,9 +6,11 @@ import { TEMPLATES } from '../components/templates.js';
 export function buildSheetData({ company, cust, items, tax, manualGst, showAmount, terms, templateId, quoteNo, date, salesStaff }) {
   const cgstLabel = `CGST (${tax.cgst}%)`;
   const sgstLabel = `SGST (${tax.sgst}%)`;
+  // Numeric columns are sized to their content (auto) so large amounts never overlap;
+  // the item-name column (minmax) absorbs the remaining width and shrinks if needed.
   const gridCols = showAmount
-    ? '30px minmax(0,1fr) 44px 88px 80px 80px 92px'
-    : '30px minmax(0,1fr) 60px 130px 110px 110px';
+    ? '22px minmax(70px,1fr) auto auto auto auto auto'
+    : '22px minmax(90px,1fr) auto auto auto auto';
   const tpl = TEMPLATES[templateId] || TEMPLATES.emerald;
 
   let subBase = 0, cgstT = 0, sgstT = 0, grand = 0;

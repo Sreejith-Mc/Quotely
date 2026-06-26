@@ -55,27 +55,27 @@ export default function QuoteSheet({ data }) {
 
       {/* Items table */}
       <div style={{ marginTop: 26, border: '1px solid #e7ebe7', borderRadius: 10, overflow: 'hidden' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: data.gridCols, background: tpl.acc, padding: '11px 14px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: tpl.theadFg }}>
+        <div style={{ display: 'grid', gridTemplateColumns: data.gridCols, columnGap: 24, background: tpl.acc, padding: '12px 20px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: tpl.theadFg }}>
           <div>#</div>
-          <div>Item</div>
-          <div style={{ textAlign: 'center' }}>Qty</div>
-          <div style={{ textAlign: 'right' }}>Rate</div>
-          <div style={{ textAlign: 'right' }}>{data.cgstLabel}</div>
-          <div style={{ textAlign: 'right' }}>{data.sgstLabel}</div>
-          {data.showAmount && <div style={{ textAlign: 'right' }}>Amount</div>}
+          <div style={{ minWidth: 0 }}>Item</div>
+          <div style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>Qty</div>
+          <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>Rate</div>
+          <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>{data.cgstLabel}</div>
+          <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>{data.sgstLabel}</div>
+          {data.showAmount && <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>Amount</div>}
         </div>
 
         {data.hasItems ? (
           <div>
             {data.items.map((item) => (
-              <div key={item.idx} style={{ display: 'grid', gridTemplateColumns: data.gridCols, padding: '13px 14px', fontSize: 12, alignItems: 'start', borderTop: '1px solid #eef1ee' }}>
+              <div key={item.idx} style={{ display: 'grid', gridTemplateColumns: data.gridCols, columnGap: 24, padding: '14px 20px', fontSize: 11.5, alignItems: 'start', borderTop: '1px solid #eef1ee' }}>
                 <div style={{ color: '#9aa39c', fontFamily: tpl.mono, fontSize: 11 }}>{item.idx}</div>
-                <div style={{ fontWeight: 600, color: '#16201b', paddingRight: 8 }}>{item.name}</div>
-                <div style={{ textAlign: 'center', fontFamily: tpl.mono, color: '#4a564e' }}>{item.qty}</div>
-                <div style={{ textAlign: 'right', fontFamily: tpl.mono, color: '#4a564e' }}>{item.rate}</div>
-                <div style={{ textAlign: 'right', fontFamily: tpl.mono, color: '#4a564e' }}>{item.cgst}</div>
-                <div style={{ textAlign: 'right', fontFamily: tpl.mono, color: '#4a564e' }}>{item.sgst}</div>
-                {data.showAmount && <div style={{ textAlign: 'right', fontFamily: tpl.mono, fontWeight: 600, color: '#16201b' }}>{item.total}</div>}
+                <div style={{ fontWeight: 600, color: '#16201b', minWidth: 0, overflowWrap: 'anywhere' }}>{item.name}</div>
+                <div style={{ textAlign: 'center', fontFamily: tpl.mono, color: '#4a564e', whiteSpace: 'nowrap' }}>{item.qty}</div>
+                <div style={{ textAlign: 'right', fontFamily: tpl.mono, color: '#4a564e', whiteSpace: 'nowrap' }}>{item.rate}</div>
+                <div style={{ textAlign: 'right', fontFamily: tpl.mono, color: '#4a564e', whiteSpace: 'nowrap' }}>{item.cgst}</div>
+                <div style={{ textAlign: 'right', fontFamily: tpl.mono, color: '#4a564e', whiteSpace: 'nowrap' }}>{item.sgst}</div>
+                {data.showAmount && <div style={{ textAlign: 'right', fontFamily: tpl.mono, fontWeight: 600, color: '#16201b', whiteSpace: 'nowrap' }}>{item.total}</div>}
               </div>
             ))}
           </div>
