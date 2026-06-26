@@ -36,7 +36,7 @@ export default function PdfOverlay({ open, onClose, sheetData, onDownload, onPri
         <button onClick={(e) => { e.stopPropagation(); onPrint(); }} style={{ border: '1px solid rgba(255,255,255,0.4)', background: 'transparent', color: '#fff', cursor: 'pointer', font: '700 12px Manrope', padding: '8px 14px', borderRadius: 9 }}>⎙ Print</button>
         <button onClick={onClose} style={{ border: '1px solid rgba(255,255,255,0.4)', background: 'transparent', color: '#fff', cursor: 'pointer', font: '700 12px Manrope', padding: '8px 14px', borderRadius: 9 }}>✕ Close</button>
       </div>
-      <div className="print-sheet" ref={wrapRef} onClick={(e) => e.stopPropagation()} style={{ position: 'relative', overflow: 'hidden', boxShadow: '0 30px 80px rgba(0,0,0,0.4)', borderRadius: 3 }}>
+      <div ref={wrapRef} onClick={(e) => e.stopPropagation()} style={{ position: 'relative', overflow: 'hidden', boxShadow: '0 30px 80px rgba(0,0,0,0.4)', borderRadius: 3 }}>
         <div ref={innerRef} style={{ width: 794, background: '#fff' }}>
           <QuoteSheet data={sheetData} />
         </div>
