@@ -351,9 +351,10 @@ export default function CreateQuotation() {
         </div>
       </div>
 
-      {/* Full-size, off-screen copy that the browser actually prints / saves as PDF. */}
+      {/* Full-size, off-screen copy that the browser actually prints / saves as PDF.
+          printMode renders it in physical mm so it always fills an exact A4 page. */}
       <div id="print-root">
-        <QuoteSheet data={sheetData} />
+        <QuoteSheet data={sheetData} printMode />
       </div>
 
       <PdfOverlay open={pdfOpen} onClose={() => setPdfOpen(false)} sheetData={sheetData} onDownload={downloadPdf} onPrint={() => window.print()} />

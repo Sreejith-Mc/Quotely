@@ -2,12 +2,17 @@
 // PDF overlay, and print — guaranteeing zero visual difference between them, fed a
 // single precomputed `data` object (see buildSheetData in pages/CreateQuotation.jsx).
 
-export default function QuoteSheet({ data }) {
+export default function QuoteSheet({ data, printMode }) {
   const tpl = data.tpl;
   return (
     <div
       style={{
-        width: 794, minHeight: 1123, background: '#ffffff', color: '#16201b',
+        // Screen preview uses px (so the fit-to-view scaler can measure it); the
+        // print copy uses physical mm so it always fills an exact A4 page regardless
+        // of the OS display scaling / printer DPI.
+        width: printMode ? '210mm' : 794,
+        minHeight: printMode ? '297mm' : 1123,
+        background: '#ffffff', color: '#16201b',
         fontFamily: tpl.font, padding: '52px 52px 40px', boxSizing: 'border-box',
         position: 'relative', display: 'flex', flexDirection: 'column',
       }}

@@ -77,25 +77,23 @@ button {
 }
 
 /* Always-present, full-size A4 copy used only for printing / Save-as-PDF.
-   Kept off-screen (never scaled) so the export is pixel-perfect regardless of
-   the on-screen preview's fit-to-view scaling. */
+   The sheet itself is sized in physical mm (see QuoteSheet printMode) so it fills
+   an exact A4 page regardless of OS display scaling or printer DPI. */
 #print-root {
   position: fixed;
   left: -10000px;
   top: 0;
-  width: 794px;
   background: #fff;
 }
 
 @media print {
   @page { size: A4; margin: 0; }
-  html, body { background: #fff !important; }
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
   body * { visibility: hidden !important; }
   #print-root, #print-root * { visibility: visible !important; }
   #print-root {
     position: absolute !important;
     left: 0 !important;
     top: 0 !important;
-    width: 794px;
   }
 }

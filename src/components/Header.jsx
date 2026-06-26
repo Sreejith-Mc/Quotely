@@ -5,29 +5,38 @@ import { useTheme } from '../context/ThemeContext.jsx';
 import { initialsOf } from '../lib/calc.js';
 import { useIsMobile } from '../hooks/useIsMobile.js';
 
-const SCREEN_LINKS = [
-  { label: 'Create Quotation', icon: '✎', to: '/' },
-  { label: 'Dashboard', icon: '▤', to: '/admin/overview' },
-  { label: 'Company Branding', icon: '◑', to: '/admin/branding' },
-  { label: 'Employee Management', icon: '◍', to: '/admin/employees' },
-  { label: 'Tax Settings', icon: '%', to: '/admin/tax' },
-  { label: 'Quotation Numbering', icon: '#', to: '/admin/numbering' },
-  { label: 'Terms & Conditions', icon: '¶', to: '/admin/terms' },
-  { label: 'Employee Login', icon: '◐', to: '/login' },
-  { label: 'Admin Login', icon: '⚿', to: '/login?as=admin' },
-];
-
 export default function Header() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { loggedIn, profile, signOut } = useAuth();
+  const { loggedIn, profile, signOut, isAdmin } = useAuth();
   const { dark, toggleDark } = useTheme();
   const isMobile = useIsMobile();
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
   const isCreate = pathname === '/';
-  const isAdmin = pathname.startsWith('/admin');
+  const onAdmin = pathname.startsWith('/admin');
+
+  // Role-aware menu — on mobile this is the primary navigation.
+  const screenLinks = [{ label: 'Create Quotation', icon: '✎', to: '/' }];
+  if (loggedIn) {
+    screenLinks.push({ label: 'Dashboard', icon: '▤', to: '/admin/overview' });
+    if (isAdmin) {
+      screenLinks.push(
+        { label: 'Branding', icon: '◑', to: '/admin/branding' },
+        { label: 'Company Info', icon: '◧', to: '/admin/company' },
+        { label: 'Employees', icon: '◍', to: '/admin/employees' },
+        { label: 'Tax Settings', icon: '%', to: '/admin/tax' },
+        { label: 'Numbering', icon: '#', to: '/admin/numbering' },
+        { label: 'Terms', icon: '¶', to: '/admin/terms' },
+        { label: 'Templates', icon: '▦', to: '/admin/templates' },
+        { label: 'Settings', icon: '⚙', to: '/admin/settings' },
+      );
+    }
+    screenLinks.push({ label: 'My Profile', icon: '◐', to: '/profile' });
+  } else {
+    screenLinks.push({ label: 'Login', icon: '◐', to: '/login' });
+  }
 
   return (
     <header style={{ position: 'sticky', top: 0, zIndex: 40, background: 'var(--panel)', borderBottom: '1px solid var(--border)', padding: isMobile ? '0 14px' : '0 24px', height: 62, display: 'flex', alignItems: 'center', justifyContent: 'space-between', backdropFilter: 'saturate(1.4) blur(8px)' }}>
@@ -40,7 +49,7 @@ export default function Header() {
       {!isMobile && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <button onClick={() => navigate('/')} style={pillStyle(isCreate)}>Create Quotation</button>
-          <button onClick={() => navigate('/admin/overview')} style={pillStyle(isAdmin)}>Dashboard</button>
+          <button onClick={() => navigate('/admin/overview')} style={pillStyle(onAdmin)}>Dashboard</button>
         </div>
       )}
 
@@ -64,8 +73,8 @@ export default function Header() {
 
         {menuOpen && (
           <div style={dropdownStyle}>
-            <div style={{ font: '700 10px Manrope', color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '8px 10px 4px' }}>Deliverable screens</div>
-            {SCREEN_LINKS.map((s) => (
+            <div style={{ font: '700 10px Manrope', color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '8px 10px 4px' }}>Menu</div>
+            {screenLinks.map((s) => (
               <button key={s.label} onClick={() => { navigate(s.to); setMenuOpen(false); }} style={dropdownItemStyle}>
                 <span style={{ width: 18, textAlign: 'center', color: 'var(--ink-3)' }}>{s.icon}</span>{s.label}
               </button>
