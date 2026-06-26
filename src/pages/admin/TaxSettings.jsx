@@ -19,7 +19,7 @@ export default function TaxSettings() {
 
   return (
     <div style={{ background: 'var(--panel)', border: '1px solid var(--border)', borderRadius: 16, padding: 22, boxShadow: 'var(--shadow)', maxWidth: 480 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))', gap: 14 }}>
         <div>
           <label style={labelStyle}>CGST %</label>
           <input type="number" step="0.5" value={form.cgst} onChange={(e) => setForm((s) => ({ ...s, cgst: e.target.value }))} style={fieldStyle} />

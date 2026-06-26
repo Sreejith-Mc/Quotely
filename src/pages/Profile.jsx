@@ -37,7 +37,7 @@ export default function Profile() {
           <label style={labelStyle}>Name</label>
           <input value={form.name} onChange={(e) => setForm((s) => ({ ...s, name: e.target.value }))} style={fieldStyle} />
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: 12 }}>
           <div>
             <label style={labelStyle}>Email</label>
             <input value={form.email} disabled style={{ ...fieldStyle, opacity: 0.6 }} />

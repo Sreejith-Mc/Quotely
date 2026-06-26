@@ -20,7 +20,7 @@ export default function Numbering() {
 
   return (
     <div style={{ background: 'var(--panel)', border: '1px solid var(--border)', borderRadius: 16, padding: 22, boxShadow: 'var(--shadow)', maxWidth: 480 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(110px,1fr))', gap: 14 }}>
         <div>
           <label style={labelStyle}>Prefix</label>
           <input value={form.prefix} onChange={(e) => setForm((s) => ({ ...s, prefix: e.target.value }))} style={fieldStyle} />

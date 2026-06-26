@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { useIsMobile } from '../../hooks/useIsMobile.js';
 
 const NAV = [
   ['overview', 'Dashboard', '▤', 'Overview of quotation activity'],
@@ -16,7 +17,29 @@ const NAV = [
 export default function AdminLayout() {
   const { pathname } = useLocation();
   const { profile } = useAuth();
+  const isMobile = useIsMobile();
   const active = NAV.find(([id]) => pathname.endsWith(id)) || NAV[0];
+
+  if (isMobile) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 62px)' }}>
+        <nav style={{ display: 'flex', gap: 6, overflowX: 'auto', borderBottom: '1px solid var(--border)', background: 'var(--panel)', padding: '10px 12px', WebkitOverflowScrolling: 'touch' }}>
+          {NAV.map(([id, label, icon]) => (
+            <NavLink key={id} to={id} style={({ isActive }) => ({ ...navStyle(isActive), padding: '8px 12px', whiteSpace: 'nowrap', flexShrink: 0 })}>
+              <span style={{ width: 16, textAlign: 'center' }}>{icon}</span>{label}
+            </NavLink>
+          ))}
+        </nav>
+        <main style={{ padding: '20px 16px' }}>
+          <div style={{ marginBottom: 18 }}>
+            <h1 style={{ margin: 0, font: '800 20px Manrope', letterSpacing: '-0.02em' }}>{active[1]}</h1>
+            <p style={{ margin: '5px 0 0', font: '500 12px Manrope', color: 'var(--ink-2)' }}>{active[3]}</p>
+          </div>
+          <Outlet />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '232px 1fr', minHeight: 'calc(100vh - 62px)' }}>

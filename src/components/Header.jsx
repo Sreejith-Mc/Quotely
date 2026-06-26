@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
 import { initialsOf } from '../lib/calc.js';
+import { useIsMobile } from '../hooks/useIsMobile.js';
 
 const SCREEN_LINKS = [
   { label: 'Create Quotation', icon: '✎', to: '/' },
@@ -21,6 +22,7 @@ export default function Header() {
   const { pathname } = useLocation();
   const { loggedIn, profile, signOut } = useAuth();
   const { dark, toggleDark } = useTheme();
+  const isMobile = useIsMobile();
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
@@ -28,29 +30,33 @@ export default function Header() {
   const isAdmin = pathname.startsWith('/admin');
 
   return (
-    <header style={{ position: 'sticky', top: 0, zIndex: 40, background: 'var(--panel)', borderBottom: '1px solid var(--border)', padding: '0 24px', height: 62, display: 'flex', alignItems: 'center', justifyContent: 'space-between', backdropFilter: 'saturate(1.4) blur(8px)' }}>
+    <header style={{ position: 'sticky', top: 0, zIndex: 40, background: 'var(--panel)', borderBottom: '1px solid var(--border)', padding: isMobile ? '0 14px' : '0 24px', height: 62, display: 'flex', alignItems: 'center', justifyContent: 'space-between', backdropFilter: 'saturate(1.4) blur(8px)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => navigate('/')}>
         <div style={{ width: 30, height: 30, borderRadius: 9, background: 'var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 16 }}>Q</div>
         <div style={{ fontWeight: 800, fontSize: 17, letterSpacing: '-0.01em' }}>Quotely</div>
-        <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--ink-3)', border: '1px solid var(--border)', borderRadius: 6, padding: '2px 6px', marginLeft: 2 }}>v2.0</div>
+        {!isMobile && <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--ink-3)', border: '1px solid var(--border)', borderRadius: 6, padding: '2px 6px', marginLeft: 2 }}>v2.0</div>}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <button onClick={() => navigate('/')} style={pillStyle(isCreate)}>Create Quotation</button>
-        <button onClick={() => navigate('/admin/overview')} style={pillStyle(isAdmin)}>Dashboard</button>
-      </div>
+      {!isMobile && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button onClick={() => navigate('/')} style={pillStyle(isCreate)}>Create Quotation</button>
+          <button onClick={() => navigate('/admin/overview')} style={pillStyle(isAdmin)}>Dashboard</button>
+        </div>
+      )}
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, position: 'relative' }}>
-        <button onClick={() => { setMenuOpen((v) => !v); setProfileOpen(false); }} title="All screens" style={iconBtnStyle(true)}>▦ Screens</button>
+        <button onClick={() => { setMenuOpen((v) => !v); setProfileOpen(false); }} title="All screens" style={iconBtnStyle(true)}>{isMobile ? '▦' : '▦ Screens'}</button>
         <button onClick={toggleDark} title="Toggle theme" style={{ ...iconBtnStyle(false), width: 36, height: 36, fontSize: 15 }}>{dark ? '☀' : '☾'}</button>
 
         {loggedIn && profile ? (
-          <button onClick={() => { setProfileOpen((v) => !v); setMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: 9, border: '1px solid var(--border)', background: 'var(--panel)', cursor: 'pointer', padding: '5px 12px 5px 6px', borderRadius: 11, marginLeft: 2 }}>
+          <button onClick={() => { setProfileOpen((v) => !v); setMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: 9, border: '1px solid var(--border)', background: 'var(--panel)', cursor: 'pointer', padding: isMobile ? 5 : '5px 12px 5px 6px', borderRadius: 11, marginLeft: 2 }}>
             <span style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--green-soft)', color: 'var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center', font: '700 12px Manrope' }}>{initialsOf(profile.name)}</span>
-            <span style={{ textAlign: 'left', lineHeight: 1.15 }}>
-              <span style={{ display: 'block', font: '700 12px Manrope', color: 'var(--ink)' }}>{profile.name}</span>
-              <span style={{ display: 'block', font: '500 10px Manrope', color: 'var(--ink-3)' }}>{profile.role}</span>
-            </span>
+            {!isMobile && (
+              <span style={{ textAlign: 'left', lineHeight: 1.15 }}>
+                <span style={{ display: 'block', font: '700 12px Manrope', color: 'var(--ink)' }}>{profile.name}</span>
+                <span style={{ display: 'block', font: '500 10px Manrope', color: 'var(--ink-3)' }}>{profile.role}</span>
+              </span>
+            )}
           </button>
         ) : (
           <button onClick={() => navigate('/login?as=admin')} style={{ border: 'none', cursor: 'pointer', font: '700 13px Manrope', padding: '9px 16px', borderRadius: 10, background: 'var(--green)', color: '#fff', marginLeft: 2 }}>Admin Login</button>

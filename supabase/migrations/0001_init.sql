@@ -169,9 +169,9 @@ create policy "avatars_owner_update" on storage.objects for update using (bucket
 -- which inserts the profiles row itself. This trigger is a fallback for any user created
 -- through Supabase Auth directly (e.g. the first admin you create by hand).
 create or replace function handle_new_user() returns trigger
-language plpgsql security definer as $$
+language plpgsql security definer set search_path = public as $$
 begin
-  insert into profiles (id, name, email, role)
+  insert into public.profiles (id, name, email, role)
   values (new.id, coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)), new.email,
           coalesce(new.raw_user_meta_data->>'role', 'employee'))
   on conflict (id) do nothing;

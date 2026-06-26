@@ -21,8 +21,8 @@ export default function AddEmployeeModal({ onClose, onInvite }) {
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }} onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} style={{ width: 420, background: 'var(--panel)', borderRadius: 16, padding: 24, boxShadow: 'var(--shadow)' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 16 }} onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 420, background: 'var(--panel)', borderRadius: 16, padding: 24, boxShadow: 'var(--shadow)', maxHeight: '90vh', overflowY: 'auto' }}>
         <div style={{ font: '800 18px Manrope', marginBottom: 4 }}>Add Employee</div>
         <p style={{ font: '500 12px Manrope', color: 'var(--ink-3)', margin: '0 0 18px' }}>They'll be able to sign in with this temporary password.</p>
 

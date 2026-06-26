@@ -10,6 +10,7 @@ import QuoteSheet from '../components/QuoteSheet.jsx';
 import PdfOverlay from '../components/PdfOverlay.jsx';
 import SuccessOverlay from '../components/SuccessOverlay.jsx';
 import { useFitSheet } from '../hooks/useFitSheet.js';
+import { useIsMobile } from '../hooks/useIsMobile.js';
 
 let uidCounter = 1;
 
@@ -18,6 +19,7 @@ export default function CreateQuotation() {
   const { loggedIn, profile, session } = useAuth();
   const { company, tax, numbering, terms, template, reload } = useSettings();
   const toast = useToast();
+  const isMobile = useIsMobile();
 
   const [cust, setCust] = useState({ name: '', company: '', address: '', phone: '', email: '' });
   const [items, setItems] = useState([]);
@@ -142,9 +144,11 @@ export default function CreateQuotation() {
   const cgstLabel = sheetData.cgstLabel, sgstLabel = sheetData.sgstLabel;
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(380px,42fr) 58fr', alignItems: 'stretch', minHeight: 'calc(100vh - 62px)' }}>
+    <div style={isMobile
+      ? { display: 'flex', flexDirection: 'column' }
+      : { display: 'grid', gridTemplateColumns: 'minmax(380px,42fr) 58fr', alignItems: 'stretch', minHeight: 'calc(100vh - 62px)' }}>
       {/* LEFT: builder */}
-      <div style={{ padding: 24, overflow: 'auto', maxHeight: 'calc(100vh - 62px)', display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ padding: isMobile ? 16 : 24, overflow: isMobile ? 'visible' : 'auto', maxHeight: isMobile ? 'none' : 'calc(100vh - 62px)', display: 'flex', flexDirection: 'column', gap: 16 }}>
         <div>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em' }}>New Quotation</h1>
           <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--ink-2)' }}>Fill in the details — the document on the right updates live.</p>
@@ -160,7 +164,7 @@ export default function CreateQuotation() {
         <Card>
           <CardHeader icon="①" title="Customer Details" onClick={() => setCustOpen((v) => !v)} chevron={custOpen} />
           {custOpen && (
-            <div style={{ padding: '0 18px 18px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div style={{ padding: '0 18px 18px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
               <Field span2 label="Customer Name" required value={cust.name} onChange={(v) => setCust((s) => ({ ...s, name: v }))} placeholder="e.g. Rohan Mehta" />
               <Field label="Company" optional value={cust.company} onChange={(v) => setCust((s) => ({ ...s, company: v }))} placeholder="Apex Manufacturing" />
               <Field label="Phone" optional value={cust.phone} onChange={(v) => setCust((s) => ({ ...s, phone: v }))} placeholder="+91 …" />
@@ -254,9 +258,9 @@ export default function CreateQuotation() {
         <div style={{ height: 8 }} />
       </div>
 
-      {/* RIGHT: preview */}
-      <div style={{ background: 'var(--bg)', borderLeft: '1px solid var(--border)', display: 'flex', flexDirection: 'column', maxHeight: 'calc(100vh - 62px)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 22px', borderBottom: '1px solid var(--border)', background: 'var(--panel)' }}>
+      {/* RIGHT (desktop) / BOTTOM (mobile): quote template preview */}
+      <div style={{ background: 'var(--bg)', borderLeft: isMobile ? 'none' : '1px solid var(--border)', borderTop: isMobile ? '1px solid var(--border)' : 'none', display: 'flex', flexDirection: 'column', maxHeight: isMobile ? 'none' : 'calc(100vh - 62px)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isMobile ? '12px 16px' : '14px 22px', borderBottom: '1px solid var(--border)', background: 'var(--panel)', flexWrap: 'wrap', gap: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <span style={{ font: '700 13px Manrope', color: 'var(--ink)' }}>Live Preview</span>
             <label style={{ display: 'flex', alignItems: 'center', gap: 7, cursor: 'pointer', userSelect: 'none' }}>
@@ -264,22 +268,22 @@ export default function CreateQuotation() {
               <span style={{ font: '600 11px Manrope', color: 'var(--ink-2)' }}>Show amounts</span>
             </label>
           </div>
-          <div style={{ display: 'flex', gap: 7 }}>
+          <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
             <button onClick={() => setPdfOpen(true)} style={ghostBtnStyle}>⤢ Preview</button>
             <button onClick={doPrint} style={ghostBtnStyle}>⎙ Print</button>
             <button onClick={downloadPdf} style={primaryBtnStyle}>↓ Download PDF</button>
           </div>
         </div>
-        <div ref={outerRef} style={{ flex: 1, overflow: 'hidden', padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div ref={outerRef} style={{ flex: 1, overflow: 'hidden', padding: isMobile ? 12 : 20, display: 'flex', alignItems: 'center', justifyContent: 'center', height: isMobile ? '82vh' : undefined }}>
           <div ref={wrapRef} style={{ position: 'relative', overflow: 'hidden', boxShadow: '0 1px 3px rgba(20,40,28,0.10),0 18px 50px rgba(20,40,28,0.16)', borderRadius: 3 }}>
             <div ref={innerRef} style={{ width: 794, background: '#fff' }}>
               <QuoteSheet data={sheetData} />
             </div>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 22px', borderTop: '1px solid var(--border)', background: 'var(--panel)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isMobile ? '12px 16px' : '12px 22px', borderTop: '1px solid var(--border)', background: 'var(--panel)', flexWrap: 'wrap', gap: 10 }}>
           <span style={{ font: '500 11px Manrope', color: 'var(--ink-3)' }}>Fits to view · exported as pixel-perfect A4 PDF</span>
-          <button onClick={generate} disabled={saving} style={{ ...primaryBtnStyle, padding: '10px 20px', borderRadius: 11, fontSize: 13, opacity: saving ? 0.7 : 1 }}>
+          <button onClick={generate} disabled={saving} style={{ ...primaryBtnStyle, padding: '10px 20px', borderRadius: 11, fontSize: 13, opacity: saving ? 0.7 : 1, flex: isMobile ? 1 : undefined }}>
             {saving ? 'Generating…' : 'Generate Quotation →'}
           </button>
         </div>

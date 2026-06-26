@@ -1,8 +1,8 @@
 export default function SuccessOverlay({ open, number, grandTotal, onClose, onNewQuote }) {
   if (!open) return null;
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 70, background: 'rgba(12,16,14,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'fadeIn .14s', backdropFilter: 'blur(3px)' }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ width: 380, background: 'var(--panel)', borderRadius: 20, padding: 32, textAlign: 'center', boxShadow: '0 30px 80px rgba(0,0,0,0.3)' }}>
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 70, background: 'rgba(12,16,14,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'fadeIn .14s', backdropFilter: 'blur(3px)', padding: 16 }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 380, background: 'var(--panel)', borderRadius: 20, padding: 32, textAlign: 'center', boxShadow: '0 30px 80px rgba(0,0,0,0.3)' }}>
         <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--green-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', animation: 'pop .4s' }}>
           <span style={{ color: 'var(--green)', fontSize: 30 }}>✓</span>
         </div>

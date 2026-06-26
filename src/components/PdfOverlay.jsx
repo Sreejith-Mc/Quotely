@@ -29,8 +29,8 @@ export default function PdfOverlay({ open, onClose, sheetData, onDownload, onPri
 
   if (!open) return null;
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(12,16,14,0.62)', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 28, overflow: 'auto', animation: 'fadeIn .14s', backdropFilter: 'blur(3px)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(12,16,14,0.62)', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 'clamp(14px,3vw,28px)', overflow: 'auto', animation: 'fadeIn .14s', backdropFilter: 'blur(3px)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18, flexWrap: 'wrap', justifyContent: 'center' }}>
         <span style={{ font: '700 13px Manrope', color: '#fff' }}>PDF Preview · {sheetData.quoteNo}</span>
         <button onClick={(e) => { e.stopPropagation(); onDownload(); }} style={{ border: 'none', background: '#fff', color: 'var(--green)', cursor: 'pointer', font: '700 12px Manrope', padding: '8px 14px', borderRadius: 9 }}>↓ Download</button>
         <button onClick={(e) => { e.stopPropagation(); onPrint(); }} style={{ border: '1px solid rgba(255,255,255,0.4)', background: 'transparent', color: '#fff', cursor: 'pointer', font: '700 12px Manrope', padding: '8px 14px', borderRadius: 9 }}>⎙ Print</button>

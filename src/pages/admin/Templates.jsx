@@ -12,7 +12,7 @@ export default function Templates() {
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 16 }}>
       {Object.values(TEMPLATES).map((t) => {
         const active = template.selected === t.id;
         return (

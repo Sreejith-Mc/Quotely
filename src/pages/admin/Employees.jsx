@@ -54,29 +54,33 @@ export default function Employees() {
         </button>
       </div>
       <div style={{ background: 'var(--panel)', border: '1px solid var(--border)', borderRadius: 16, boxShadow: 'var(--shadow)', overflow: 'hidden' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '40px 1fr 1fr 90px 100px', padding: '11px 18px', font: '600 10px Manrope', color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid var(--border)' }}>
-          <div></div><div>Name</div><div>Email</div><div>Role</div><div style={{ textAlign: 'right' }}>Status</div>
-        </div>
-        {employees.length === 0 && <div style={{ padding: '24px 18px', color: 'var(--ink-3)', font: '500 13px Manrope' }}>No employees yet.</div>}
-        {employees.map((emp) => (
-          <div key={emp.id} style={{ display: 'grid', gridTemplateColumns: '40px 1fr 1fr 90px 100px', padding: '11px 18px', alignItems: 'center', borderBottom: '1px solid var(--border)', fontSize: 13 }}>
-            <span style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--green-soft)', color: 'var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center', font: '800 11px Manrope' }}>{initialsOf(emp.name)}</span>
-            <div style={{ fontWeight: 600 }}>{emp.name || '—'}</div>
-            <div style={{ color: 'var(--ink-2)' }}>{emp.email}</div>
-            <div style={{ textTransform: 'capitalize', color: 'var(--ink-2)' }}>{emp.role}</div>
-            <div style={{ textAlign: 'right' }}>
-              <button
-                onClick={() => toggleActive(emp)}
-                style={{
-                  border: 'none', cursor: 'pointer', font: '600 11px Manrope', padding: '4px 11px', borderRadius: 20,
-                  background: emp.active ? 'var(--green-soft)' : 'var(--panel-2)', color: emp.active ? 'var(--green)' : 'var(--ink-3)',
-                }}
-              >
-                {emp.active ? 'Active' : 'Disabled'}
-              </button>
+        <div style={{ overflowX: 'auto' }}>
+          <div style={{ minWidth: 520 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '40px 1fr 1fr 90px 100px', padding: '11px 18px', font: '600 10px Manrope', color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid var(--border)' }}>
+              <div></div><div>Name</div><div>Email</div><div>Role</div><div style={{ textAlign: 'right' }}>Status</div>
             </div>
+            {employees.length === 0 && <div style={{ padding: '24px 18px', color: 'var(--ink-3)', font: '500 13px Manrope' }}>No employees yet.</div>}
+            {employees.map((emp) => (
+              <div key={emp.id} style={{ display: 'grid', gridTemplateColumns: '40px 1fr 1fr 90px 100px', padding: '11px 18px', alignItems: 'center', borderBottom: '1px solid var(--border)', fontSize: 13 }}>
+                <span style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--green-soft)', color: 'var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center', font: '800 11px Manrope' }}>{initialsOf(emp.name)}</span>
+                <div style={{ fontWeight: 600 }}>{emp.name || '—'}</div>
+                <div style={{ color: 'var(--ink-2)' }}>{emp.email}</div>
+                <div style={{ textTransform: 'capitalize', color: 'var(--ink-2)' }}>{emp.role}</div>
+                <div style={{ textAlign: 'right' }}>
+                  <button
+                    onClick={() => toggleActive(emp)}
+                    style={{
+                      border: 'none', cursor: 'pointer', font: '600 11px Manrope', padding: '4px 11px', borderRadius: 20,
+                      background: emp.active ? 'var(--green-soft)' : 'var(--panel-2)', color: emp.active ? 'var(--green)' : 'var(--ink-3)',
+                    }}
+                  >
+                    {emp.active ? 'Active' : 'Disabled'}
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
       {modalOpen && <AddEmployeeModal onClose={() => setModalOpen(false)} onInvite={invite} />}
     </>

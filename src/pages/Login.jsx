@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
+import { useIsMobile } from '../hooks/useIsMobile.js';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ export default function Login() {
   const adminMode = params.get('as') === 'admin';
   const { signIn } = useAuth();
   const toast = useToast();
+  const isMobile = useIsMobile();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -31,7 +33,7 @@ export default function Login() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+    <div style={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <div style={{ width: '100%', maxWidth: 360 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28 }}>
@@ -54,6 +56,7 @@ export default function Login() {
           </button>
         </div>
       </div>
+      {!isMobile && (
       <div style={{ background: 'var(--green)', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 48, color: '#eaf3ec' }}>
         <div style={{ font: '800 30px Manrope', lineHeight: 1.2, letterSpacing: '-0.02em', color: '#fff', maxWidth: 380 }}>Professional quotations in under two minutes.</div>
         <p style={{ font: '500 14px Manrope', color: 'rgba(255,255,255,0.78)', marginTop: 14, maxWidth: 360, lineHeight: 1.6 }}>Smart GST auto-calculation, pixel-perfect PDF output, and a live preview that matches your final document exactly.</p>
@@ -63,6 +66,7 @@ export default function Login() {
           ))}
         </div>
       </div>
+      )}
     </div>
   );
 }
