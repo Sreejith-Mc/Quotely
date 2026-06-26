@@ -13,6 +13,10 @@ export default function AddEmployeeModal({ onClose, onInvite }) {
       setError('Name and email are required');
       return;
     }
+    if (password.trim().length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
     setSending(true);
     setError('');
     const err = await onInvite({ name, email, password });
@@ -30,11 +34,12 @@ export default function AddEmployeeModal({ onClose, onInvite }) {
         <input value={name} onChange={(e) => setName(e.target.value)} style={{ ...fieldStyle, marginBottom: 12 }} />
         <label style={labelStyle}>Email</label>
         <input value={email} onChange={(e) => setEmail(e.target.value)} style={{ ...fieldStyle, marginBottom: 12 }} />
-        <label style={labelStyle}>Temporary Password</label>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-          <input value={password} readOnly style={{ ...fieldStyle, fontFamily: "'JetBrains Mono'" }} />
-          <button onClick={() => setPassword(genTempPassword())} style={{ border: '1px solid var(--border)', background: 'var(--field)', color: 'var(--ink)', cursor: 'pointer', borderRadius: 10, padding: '0 14px', font: '600 12px Manrope' }}>↻</button>
+        <label style={labelStyle}>Password</label>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 4 }}>
+          <input value={password} onChange={(e) => setPassword(e.target.value)} style={{ ...fieldStyle, fontFamily: "'JetBrains Mono'" }} />
+          <button onClick={() => setPassword(genTempPassword())} title="Generate a random password" style={{ border: '1px solid var(--border)', background: 'var(--field)', color: 'var(--ink)', cursor: 'pointer', borderRadius: 10, padding: '0 14px', font: '600 12px Manrope' }}>↻</button>
         </div>
+        <p style={{ font: '500 11px Manrope', color: 'var(--ink-3)', margin: '0 0 8px' }}>Type a custom password (easier to share), or press ↻ to generate one. Minimum 6 characters.</p>
 
         {error && <p style={{ color: 'var(--maroon)', font: '600 12px Manrope', margin: '8px 0 0' }}>{error}</p>}
 

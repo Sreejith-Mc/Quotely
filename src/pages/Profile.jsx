@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import { supabase } from '../supabaseClient.js';
 import { initialsOf } from '../lib/calc.js';
+import ChangePassword from '../components/ChangePassword.jsx';
 
 export default function Profile() {
   const { profile, refreshProfile } = useAuth();
@@ -50,6 +51,9 @@ export default function Profile() {
         <button onClick={save} disabled={saving} style={{ border: 'none', background: 'var(--green)', color: '#fff', cursor: 'pointer', font: '700 13px Manrope', padding: 11, borderRadius: 11, marginTop: 4, opacity: saving ? 0.7 : 1 }}>
           {saving ? 'Saving…' : 'Save profile'}
         </button>
+      </div>
+      <div style={{ marginTop: 16 }}>
+        <ChangePassword />
       </div>
     </div>
   );
