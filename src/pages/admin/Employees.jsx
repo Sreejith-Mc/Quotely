@@ -67,12 +67,12 @@ export default function Employees() {
       <div style={{ background: 'var(--panel)', border: '1px solid var(--border)', borderRadius: 16, boxShadow: 'var(--shadow)', overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
           <div style={{ minWidth: 520 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '40px 1fr 1fr 120px 100px', padding: '11px 18px', font: '600 10px Manrope', color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid var(--border)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '40px 1fr 1fr 120px 100px', gap: 12, padding: '11px 18px', font: '600 10px Manrope', color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid var(--border)' }}>
               <div></div><div>Name</div><div>Email</div><div>Role</div><div style={{ textAlign: 'right' }}>Status</div>
             </div>
             {employees.length === 0 && <div style={{ padding: '24px 18px', color: 'var(--ink-3)', font: '500 13px Manrope' }}>No employees yet.</div>}
             {employees.map((emp) => (
-              <div key={emp.id} style={{ display: 'grid', gridTemplateColumns: '40px 1fr 1fr 120px 100px', padding: '11px 18px', alignItems: 'center', borderBottom: '1px solid var(--border)', fontSize: 13, gap: 6 }}>
+              <div key={emp.id} style={{ display: 'grid', gridTemplateColumns: '40px 1fr 1fr 120px 100px', gap: 12, padding: '11px 18px', alignItems: 'center', borderBottom: '1px solid var(--border)', fontSize: 13 }}>
                 <span style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--green-soft)', color: 'var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center', font: '800 11px Manrope' }}>{initialsOf(emp.name)}</span>
                 <div style={{ fontWeight: 600, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{emp.name || '—'}</div>
                 <div style={{ color: 'var(--ink-2)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{emp.email}</div>

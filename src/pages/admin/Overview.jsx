@@ -94,12 +94,12 @@ export default function Overview() {
           <div style={{ padding: '16px 18px', borderBottom: '1px solid var(--border)', font: '700 14px Manrope' }}>Recent Quotations</div>
           <div style={{ overflowX: 'auto' }}>
             <div style={{ minWidth: recentMinW }}>
-              <div style={{ display: 'grid', gridTemplateColumns: recentCols, padding: '11px 18px', font: '600 10px Manrope', color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid var(--border)' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: recentCols, gap: 12, padding: '11px 18px', font: '600 10px Manrope', color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid var(--border)' }}>
                 <div>Number</div><div>Customer</div>{isAdmin && <div>Created By</div>}<div style={{ textAlign: 'right' }}>Amount</div><div>Status</div><div></div>
               </div>
               {recent.length === 0 && <div style={{ padding: '24px 18px', color: 'var(--ink-3)', font: '500 13px Manrope' }}>No quotations yet.</div>}
               {recent.map((q) => (
-                <div key={q.id} style={{ display: 'grid', gridTemplateColumns: recentCols, padding: '11px 18px', alignItems: 'center', borderBottom: '1px solid var(--border)', fontSize: 13, gap: 6 }}>
+                <div key={q.id} style={{ display: 'grid', gridTemplateColumns: recentCols, gap: 12, padding: '11px 18px', alignItems: 'center', borderBottom: '1px solid var(--border)', fontSize: 13 }}>
                   <div style={{ font: "600 12px 'JetBrains Mono'", color: 'var(--green)' }}>{q.number}</div>
                   <div style={{ fontWeight: 600, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q.customer_name}</div>
                   {isAdmin && <div style={{ color: 'var(--ink-2)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q.sales_staff_name || '—'}</div>}
