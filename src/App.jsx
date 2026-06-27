@@ -33,13 +33,15 @@ function RequireAdmin({ children }) {
 
 export default function App() {
   const { pathname } = useLocation();
-  const showHeader = pathname !== '/login';
+  const { loggedIn } = useAuth();
+  // Header (and its nav) only exists once signed in — login is the sole entry point.
+  const showHeader = loggedIn && pathname !== '/login';
 
   return (
     <div style={{ minHeight: '100vh' }}>
       {showHeader && <Header />}
       <Routes>
-        <Route path="/" element={<CreateQuotation />} />
+        <Route path="/" element={<RequireAuth><CreateQuotation /></RequireAuth>} />
         <Route path="/edit/:id" element={<RequireAuth><CreateQuotation /></RequireAuth>} />
         <Route path="/login" element={<Login />} />
         <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />

@@ -34,8 +34,6 @@ export default function Header() {
       );
     }
     screenLinks.push({ label: 'My Profile', icon: '◐', to: '/profile' });
-  } else {
-    screenLinks.push({ label: 'Login', icon: '◐', to: '/login' });
   }
 
   return (
@@ -57,7 +55,7 @@ export default function Header() {
         <button onClick={() => { setMenuOpen((v) => !v); setProfileOpen(false); }} title="All screens" style={iconBtnStyle(true)}>{isMobile ? '▦' : '▦ Screens'}</button>
         <button onClick={toggleDark} title="Toggle theme" style={{ ...iconBtnStyle(false), width: 36, height: 36, fontSize: 15 }}>{dark ? '☀' : '☾'}</button>
 
-        {loggedIn && profile ? (
+        {loggedIn && profile && (
           <button onClick={() => { setProfileOpen((v) => !v); setMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: 9, border: '1px solid var(--border)', background: 'var(--panel)', cursor: 'pointer', padding: isMobile ? 5 : '5px 12px 5px 6px', borderRadius: 11, marginLeft: 2 }}>
             <span style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--green-soft)', color: 'var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center', font: '700 12px Manrope' }}>{initialsOf(profile.name)}</span>
             {!isMobile && (
@@ -67,8 +65,6 @@ export default function Header() {
               </span>
             )}
           </button>
-        ) : (
-          <button onClick={() => navigate('/login')} style={{ border: 'none', cursor: 'pointer', font: '700 13px Manrope', padding: '9px 16px', borderRadius: 10, background: 'var(--green)', color: '#fff', marginLeft: 2 }}>Login</button>
         )}
 
         {menuOpen && (
