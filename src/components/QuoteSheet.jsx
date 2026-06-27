@@ -60,37 +60,41 @@ export default function QuoteSheet({ data, printMode }) {
         </div>
       </div>
 
-      {/* Items table */}
+      {/* Items table — a real <table> so headers and data columns always stay
+          aligned and auto-size to whatever values (small or huge) are inside. */}
       <div style={{ marginTop: 26, border: '1px solid #e7ebe7', borderRadius: 10, overflow: 'hidden' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: data.gridCols, columnGap: 24, background: tpl.acc, padding: '12px 20px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: tpl.theadFg }}>
-          <div>#</div>
-          <div style={{ minWidth: 0 }}>Item</div>
-          <div style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>Qty</div>
-          {data.showWarranty && <div style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>Warranty</div>}
-          {data.showRate && <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>Rate</div>}
-          {data.showRate && <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>{data.cgstLabel}</div>}
-          {data.showRate && <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>{data.sgstLabel}</div>}
-          {data.showAmount && <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>Amount</div>}
-        </div>
-
-        {data.hasItems ? (
-          <div>
-            {data.items.map((item) => (
-              <div key={item.idx} style={{ display: 'grid', gridTemplateColumns: data.gridCols, columnGap: 24, padding: '14px 20px', fontSize: 11.5, alignItems: 'start', borderTop: '1px solid #eef1ee' }}>
-                <div style={{ color: '#9aa39c', fontFamily: tpl.mono, fontSize: 11 }}>{item.idx}</div>
-                <div style={{ fontWeight: 600, color: '#16201b', minWidth: 0, overflowWrap: 'anywhere' }}>{item.name}</div>
-                <div style={{ textAlign: 'center', fontFamily: tpl.mono, color: '#4a564e', whiteSpace: 'nowrap' }}>{item.qty}</div>
-                {data.showWarranty && <div style={{ textAlign: 'center', color: '#4a564e', whiteSpace: 'nowrap' }}>{item.warranty}</div>}
-                {data.showRate && <div style={{ textAlign: 'right', fontFamily: tpl.mono, color: '#4a564e', whiteSpace: 'nowrap' }}>{item.rate}</div>}
-                {data.showRate && <div style={{ textAlign: 'right', fontFamily: tpl.mono, color: '#4a564e', whiteSpace: 'nowrap' }}>{item.cgst}</div>}
-                {data.showRate && <div style={{ textAlign: 'right', fontFamily: tpl.mono, color: '#4a564e', whiteSpace: 'nowrap' }}>{item.sgst}</div>}
-                {data.showAmount && <div style={{ textAlign: 'right', fontFamily: tpl.mono, fontWeight: 600, color: '#16201b', whiteSpace: 'nowrap' }}>{item.total}</div>}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div style={{ padding: '34px 14px', textAlign: 'center', fontSize: 12, color: '#b7bfb8', borderTop: '1px solid #eef1ee' }}>No items added yet</div>
-        )}
+        <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'auto' }}>
+          <thead>
+            <tr style={{ background: tpl.acc, color: tpl.theadFg }}>
+              <th style={{ ...thBase, textAlign: 'left' }}>#</th>
+              <th style={{ ...thBase, textAlign: 'left', width: '99%' }}>Item</th>
+              <th style={{ ...thBase, textAlign: 'center' }}>Qty</th>
+              {data.showWarranty && <th style={{ ...thBase, textAlign: 'center' }}>Warranty</th>}
+              {data.showRate && <th style={{ ...thBase, textAlign: 'right' }}>Rate</th>}
+              {data.showRate && <th style={{ ...thBase, textAlign: 'right' }}>{data.cgstLabel}</th>}
+              {data.showRate && <th style={{ ...thBase, textAlign: 'right' }}>{data.sgstLabel}</th>}
+              {data.showAmount && <th style={{ ...thBase, textAlign: 'right' }}>Amount</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {data.hasItems ? (
+              data.items.map((item) => (
+                <tr key={item.idx} style={{ borderTop: '1px solid #eef1ee' }}>
+                  <td style={{ ...tdBase, color: '#9aa39c', fontFamily: tpl.mono }}>{item.idx}</td>
+                  <td style={{ ...tdBase, fontWeight: 600, color: '#16201b', whiteSpace: 'normal', overflowWrap: 'anywhere' }}>{item.name}</td>
+                  <td style={{ ...tdBase, textAlign: 'center', fontFamily: tpl.mono }}>{item.qty}</td>
+                  {data.showWarranty && <td style={{ ...tdBase, textAlign: 'center' }}>{item.warranty}</td>}
+                  {data.showRate && <td style={{ ...tdBase, textAlign: 'right', fontFamily: tpl.mono }}>{item.rate}</td>}
+                  {data.showRate && <td style={{ ...tdBase, textAlign: 'right', fontFamily: tpl.mono }}>{item.cgst}</td>}
+                  {data.showRate && <td style={{ ...tdBase, textAlign: 'right', fontFamily: tpl.mono }}>{item.sgst}</td>}
+                  {data.showAmount && <td style={{ ...tdBase, textAlign: 'right', fontFamily: tpl.mono, fontWeight: 600, color: '#16201b' }}>{item.total}</td>}
+                </tr>
+              ))
+            ) : (
+              <tr><td colSpan={3 + (data.showWarranty ? 1 : 0) + (data.showRate ? 3 : 0) + (data.showAmount ? 1 : 0)} style={{ padding: '34px 14px', textAlign: 'center', fontSize: 12, color: '#b7bfb8' }}>No items added yet</td></tr>
+            )}
+          </tbody>
+        </table>
       </div>
 
       {/* Summary */}
@@ -155,3 +159,6 @@ export default function QuoteSheet({ data, printMode }) {
     </div>
   );
 }
+
+const thBase = { padding: '12px 12px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap', verticalAlign: 'middle' };
+const tdBase = { padding: '12px 12px', fontSize: 11.5, color: '#4a564e', whiteSpace: 'nowrap', verticalAlign: 'top', lineHeight: 1.4 };
