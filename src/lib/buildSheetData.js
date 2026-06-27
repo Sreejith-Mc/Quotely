@@ -27,7 +27,7 @@ export function buildSheetData({ company, cust, items, tax, manualGst, showAmoun
 
   return {
     company: {
-      logoSrc: company.logo_url, name: company.name, address: company.address, sealName: company.seal_name,
+      logoSrc: company.logo_url, name: company.name, address: company.address, sealName: company.seal_name, sealUrl: company.seal_url,
       phone: company.phone, email: company.email, website: company.website, gst: company.gst,
       hasPhone: !!company.phone, hasEmail: !!company.email, hasWebsite: !!company.website, hasGst: !!company.gst,
     },

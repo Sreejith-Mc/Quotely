@@ -130,14 +130,20 @@ export default function QuoteSheet({ data, printMode }) {
           </ol>
         </div>
         <div style={{ width: 150, height: 150, flexShrink: 0, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ position: 'absolute', inset: 0, border: '2px solid rgba(124,24,37,0.55)', borderRadius: '50%', transform: 'rotate(-9deg)' }} />
-          <div style={{ position: 'absolute', inset: 9, border: '1px solid rgba(124,24,37,0.35)', borderRadius: '50%', transform: 'rotate(-9deg)' }} />
-          <div style={{ textAlign: 'center', transform: 'rotate(-9deg)', color: 'rgba(124,24,37,0.7)' }}>
-            <div style={{ fontSize: 9, letterSpacing: '0.16em', fontWeight: 700 }}>★ AUTHORISED ★</div>
-            <div style={{ fontSize: 14, fontWeight: 800, margin: '5px 0', letterSpacing: '0.04em' }}>{data.company.sealName}</div>
-            <div style={{ fontSize: 8, letterSpacing: '0.18em', fontWeight: 600 }}>SINCE 1994</div>
-            <div style={{ fontSize: 8, letterSpacing: '0.1em', marginTop: 4, color: 'rgba(124,24,37,0.5)' }}>SIGNATORY</div>
-          </div>
+          {data.company.sealUrl ? (
+            <img src={data.company.sealUrl} alt="seal" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+          ) : (
+            <>
+              <div style={{ position: 'absolute', inset: 0, border: '2px solid rgba(124,24,37,0.55)', borderRadius: '50%', transform: 'rotate(-9deg)' }} />
+              <div style={{ position: 'absolute', inset: 9, border: '1px solid rgba(124,24,37,0.35)', borderRadius: '50%', transform: 'rotate(-9deg)' }} />
+              <div style={{ textAlign: 'center', transform: 'rotate(-9deg)', color: 'rgba(124,24,37,0.7)' }}>
+                <div style={{ fontSize: 9, letterSpacing: '0.16em', fontWeight: 700 }}>★ AUTHORISED ★</div>
+                <div style={{ fontSize: 14, fontWeight: 800, margin: '5px 0', letterSpacing: '0.04em' }}>{data.company.sealName}</div>
+                <div style={{ fontSize: 8, letterSpacing: '0.18em', fontWeight: 600 }}>SINCE 1994</div>
+                <div style={{ fontSize: 8, letterSpacing: '0.1em', marginTop: 4, color: 'rgba(124,24,37,0.5)' }}>SIGNATORY</div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
