@@ -1,9 +1,9 @@
 import { calcItem, money, grandTotalWords } from './calc.js';
-import { TEMPLATES } from '../components/templates.js';
+import { buildTpl } from '../components/templates.js';
 
 // Builds the single `data` object the QuoteSheet component renders from — shared by
 // the inline live preview, the PDF overlay, and print so they can never drift apart.
-export function buildSheetData({ company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms, templateId, quoteNo, date, salesStaff }) {
+export function buildSheetData({ company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms, templateId, accent, quoteNo, date, salesStaff }) {
   const cgstLabel = `CGST (${tax.cgst}%)`;
   const sgstLabel = `SGST (${tax.sgst}%)`;
   // "Show rate" off → a minimal quote: only #, Item, Qty in the table and only the
@@ -19,7 +19,7 @@ export function buildSheetData({ company, cust, items, tax, manualGst, showAmoun
   if (showRateCols) cols.push('auto', 'auto', 'auto'); // rate, cgst, sgst
   if (showAmountCol) cols.push('auto'); // amount
   const gridCols = cols.join(' ');
-  const tpl = TEMPLATES[templateId] || TEMPLATES.emerald;
+  const tpl = buildTpl(templateId, accent);
 
   let subBase = 0, cgstT = 0, sgstT = 0, grand = 0;
   const rowsOut = items.map((it, i) => {

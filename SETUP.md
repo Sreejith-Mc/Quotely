@@ -12,6 +12,7 @@ This app is a React + Vite SPA backed by Supabase (Postgres, Auth, Storage) and 
    - `0004_quotation_delete.sql` — lets employees delete their own quotations (admins can delete any).
    - `0005_show_rate.sql` — adds the per-quotation "Show rate" flag.
    - `0006_show_warranty.sql` — adds the per-quotation "Show warranty" flag.
+   - `0007_template_accent.sql` — adds the accent-colour column for the template.
 3. In **Authentication > Providers**, make sure Email/Password sign-in is enabled.
    - **Turn OFF public sign-ups** so only admin-created accounts can log in: in **Authentication > Sign In / Providers** (or **Settings**), disable **"Allow new users to sign up"**. Accounts are then only created by an admin via the in-app "Add Employee" button (which uses the service-role key server-side). The whole app is gated behind login, so without this, someone could otherwise self-register through the API.
 4. Create your first admin account:

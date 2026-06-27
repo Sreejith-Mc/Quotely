@@ -84,7 +84,7 @@ export default function CreateQuotation() {
     : todayStr();
 
   function addItem() {
-    setItems((arr) => [...arr, { id: uidCounter++, name: '', qty: 1, total: 0, warranty: '' }]);
+    setItems((arr) => [...arr, { id: uidCounter++, name: '', qty: 1, total: '', warranty: '' }]);
   }
   function delItem(id) {
     setItems((arr) => arr.filter((it) => it.id !== id));
@@ -117,7 +117,7 @@ export default function CreateQuotation() {
   }
 
   const sheetData = useMemo(() => buildSheetData({
-    company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms: terms.content || '', templateId: template.selected,
+    company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms: terms.content || '', templateId: template.selected, accent: template.accent,
     quoteNo: quoteNoPreview, date: today, salesStaff,
   }), [company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms, template, quoteNoPreview, today, salesStaff]);
 
@@ -314,7 +314,7 @@ export default function CreateQuotation() {
                         </div>
                         <div>
                           <div style={subLabelStyle}>Total Amount (₹)</div>
-                          <input value={it.total} onChange={(e) => setItemField(it.id, 'total', e.target.value)} inputMode="numeric" style={{ ...inputStyle, font: "600 13px 'JetBrains Mono'", textAlign: 'right' }} />
+                          <input value={it.total} onChange={(e) => setItemField(it.id, 'total', e.target.value)} placeholder="0" inputMode="numeric" style={{ ...inputStyle, font: "600 13px 'JetBrains Mono'", textAlign: 'right' }} />
                         </div>
                       </div>
                       <div style={{ marginTop: 8, paddingLeft: 30 }}>

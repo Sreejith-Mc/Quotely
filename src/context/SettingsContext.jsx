@@ -8,7 +8,7 @@ const DEFAULTS = {
   tax: { cgst: 9, sgst: 9 },
   numbering: { prefix: 'QT-', next_number: 1, pad: 6 },
   terms: { content: '' },
-  template: { selected: 'emerald' },
+  template: { selected: 'emerald', accent: '#22673a' },
 };
 
 export function SettingsProvider({ children }) {
@@ -59,8 +59,8 @@ export function SettingsProvider({ children }) {
     if (!error && data) setTerms(data);
     return { error };
   }
-  async function saveTemplate(selected) {
-    const { data, error } = await supabase.from('template_settings').update({ selected }).eq('id', 1).select().single();
+  async function saveTemplate(patch) {
+    const { data, error } = await supabase.from('template_settings').update(patch).eq('id', 1).select().single();
     if (!error && data) setTemplate(data);
     return { error };
   }

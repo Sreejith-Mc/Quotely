@@ -26,7 +26,7 @@ export default function Overview() {
     // RLS already restricts employees to their own rows, but we also scope the
     // queries explicitly so the stats and lists stay consistent.
     let monthQ = supabase.from('quotations').select('grand_total').gte('created_at', monthStart.toISOString());
-    let recentQ = supabase.from('quotations').select('id,number,customer_name,grand_total,status,created_at').order('created_at', { ascending: false }).limit(8);
+    let recentQ = supabase.from('quotations').select('id,number,customer_name,sales_staff_name,grand_total,status,created_at').order('created_at', { ascending: false }).limit(8);
     if (!isAdmin && userId) {
       monthQ = monthQ.eq('sales_staff_id', userId);
       recentQ = recentQ.eq('sales_staff_id', userId);
@@ -72,6 +72,10 @@ export default function Overview() {
 
   if (!stats) return null;
 
+  // Admins get an extra "Created By" column on the recent list.
+  const recentCols = isAdmin ? '110px 1fr 130px 110px 120px 86px' : '110px 1fr 110px 120px 86px';
+  const recentMinW = isAdmin ? 680 : 540;
+
   return (
     <>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 14 }}>
@@ -89,15 +93,16 @@ export default function Overview() {
         <div style={{ background: 'var(--panel)', border: '1px solid var(--border)', borderRadius: 16, boxShadow: 'var(--shadow)', overflow: 'hidden' }}>
           <div style={{ padding: '16px 18px', borderBottom: '1px solid var(--border)', font: '700 14px Manrope' }}>Recent Quotations</div>
           <div style={{ overflowX: 'auto' }}>
-            <div style={{ minWidth: 540 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '110px 1fr 110px 130px 86px', padding: '11px 18px', font: '600 10px Manrope', color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid var(--border)' }}>
-                <div>Number</div><div>Customer</div><div style={{ textAlign: 'right' }}>Amount</div><div>Status</div><div></div>
+            <div style={{ minWidth: recentMinW }}>
+              <div style={{ display: 'grid', gridTemplateColumns: recentCols, padding: '11px 18px', font: '600 10px Manrope', color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid var(--border)' }}>
+                <div>Number</div><div>Customer</div>{isAdmin && <div>Created By</div>}<div style={{ textAlign: 'right' }}>Amount</div><div>Status</div><div></div>
               </div>
               {recent.length === 0 && <div style={{ padding: '24px 18px', color: 'var(--ink-3)', font: '500 13px Manrope' }}>No quotations yet.</div>}
               {recent.map((q) => (
-                <div key={q.id} style={{ display: 'grid', gridTemplateColumns: '110px 1fr 110px 130px 86px', padding: '11px 18px', alignItems: 'center', borderBottom: '1px solid var(--border)', fontSize: 13, gap: 6 }}>
+                <div key={q.id} style={{ display: 'grid', gridTemplateColumns: recentCols, padding: '11px 18px', alignItems: 'center', borderBottom: '1px solid var(--border)', fontSize: 13, gap: 6 }}>
                   <div style={{ font: "600 12px 'JetBrains Mono'", color: 'var(--green)' }}>{q.number}</div>
                   <div style={{ fontWeight: 600, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q.customer_name}</div>
+                  {isAdmin && <div style={{ color: 'var(--ink-2)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q.sales_staff_name || '—'}</div>}
                   <div style={{ textAlign: 'right', fontFamily: "'JetBrains Mono'" }}>{money(q.grand_total)}</div>
                   <div>
                     <select value={q.status} onChange={(e) => quickStatus(q, e.target.value)} style={{ ...statusSelectStyle, ...statusChip(q.status) }}>
