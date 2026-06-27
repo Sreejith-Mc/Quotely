@@ -27,9 +27,9 @@ export default function QuoteSheet({ data, printMode }) {
           )}
           <div style={{ fontSize: 11, lineHeight: 1.6, color: '#4a564e', maxWidth: 300, whiteSpace: 'pre-line' }}>{data.company.address}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2, fontSize: 11, color: '#4a564e' }}>
-            {data.company.hasPhone && <div><span style={{ color: '#9aa39c' }}>T&nbsp;&nbsp;</span>{data.company.phone}</div>}
-            {data.company.hasEmail && <div><span style={{ color: '#9aa39c' }}>E&nbsp;&nbsp;</span>{data.company.email}</div>}
-            {data.company.hasWebsite && <div><span style={{ color: '#9aa39c' }}>W&nbsp;</span>{data.company.website}</div>}
+            {data.company.hasPhone && <div>{data.company.phone}</div>}
+            {data.company.hasEmail && <div>{data.company.email}</div>}
+            {data.company.hasWebsite && <div>{data.company.website}</div>}
             {data.company.hasGst && <div><span style={{ color: '#9aa39c' }}>GSTIN&nbsp;</span>{data.company.gst}</div>}
           </div>
         </div>

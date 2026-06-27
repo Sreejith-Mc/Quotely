@@ -11,7 +11,8 @@ import PdfOverlay from '../components/PdfOverlay.jsx';
 import SuccessOverlay from '../components/SuccessOverlay.jsx';
 import { useFitSheet } from '../hooks/useFitSheet.js';
 import { useIsMobile } from '../hooks/useIsMobile.js';
-import html2pdf from 'html2pdf.js';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 let uidCounter = 1;
 
@@ -28,6 +29,7 @@ export default function CreateQuotation() {
   const [manualGst, setManualGst] = useState(false);
   const [showAmount, setShowAmount] = useState(true);
   const [showRate, setShowRate] = useState(true);
+  const [multiPage, setMultiPage] = useState(false);
   const [custOpen, setCustOpen] = useState(true);
   const [pdfOpen, setPdfOpen] = useState(false);
   const [success, setSuccess] = useState(null);
@@ -118,42 +120,54 @@ export default function CreateQuotation() {
 
   useFitSheet(outerRef, wrapRef, innerRef, { maxScale: 1.05, margin: 36 });
 
-  function pdfWorker() {
+  // Render the off-screen A4 sheet to a jsPDF. Single page by default (scaled to fit);
+  // multi-page only when the toggle is on AND the content actually overflows.
+  async function buildPdf() {
     const el = document.getElementById('print-root')?.firstElementChild;
     if (!el) return null;
-    return html2pdf().set({
-      margin: 0,
-      filename: `${sheetData.quoteNo || 'Quotation'}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    }).from(el);
+    const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+    const imgData = canvas.toDataURL('image/jpeg', 0.98);
+    const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+    const pageW = 210, pageH = 297;
+    const fullH = (pageW * canvas.height) / canvas.width; // height at full page width
+
+    if (multiPage && fullH > pageH + 1) {
+      let position = 0;
+      for (let printed = 0; printed < fullH; printed += pageH) {
+        if (position !== 0) pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, position, pageW, fullH);
+        position -= pageH;
+      }
+    } else {
+      // One page — contain the whole sheet within a single A4 page.
+      let w = pageW, h = fullH;
+      if (h > pageH) { h = pageH; w = (pageH * canvas.width) / canvas.height; }
+      pdf.addImage(imgData, 'JPEG', (pageW - w) / 2, 0, w, h);
+    }
+    return pdf;
   }
 
-  // Print prints the *exact* generated PDF (opened in a new tab with auto-print),
-  // so it always matches Download — never the browser's mis-scaled window.print().
+  // Print prints the *exact* generated PDF (auto-print in a new tab), so it always
+  // matches Download — never the browser's mis-scaled window.print().
   function doPrint() {
-    const worker = pdfWorker();
-    if (!worker) { window.print(); return; }
     const win = window.open('', '_blank'); // opened inside the click so it isn't blocked
     toast('Preparing print…');
-    worker.toPdf().get('pdf').then((pdf) => {
+    buildPdf().then((pdf) => {
+      if (!pdf) { if (win) win.close(); window.print(); return; }
       pdf.autoPrint();
       const url = pdf.output('bloburl');
-      if (win) win.location.href = url;
-      else window.print();
+      if (win) win.location.href = url; else window.print();
     }).catch(() => { if (win) win.close(); window.print(); });
   }
 
   async function downloadPdf() {
-    const worker = pdfWorker();
-    if (!worker) { window.print(); return; }
     toast('Preparing PDF…');
     try {
-      await worker.save();
+      const pdf = await buildPdf();
+      if (!pdf) { window.print(); return; }
+      pdf.save(`${sheetData.quoteNo || 'Quotation'}.pdf`);
     } catch {
-      toast('Could not generate PDF — opening print instead');
-      window.print();
+      toast('Could not generate PDF');
     }
   }
 
@@ -359,6 +373,10 @@ export default function CreateQuotation() {
             <label style={{ ...checkLabelStyle, opacity: showRate ? 1 : 0.45, cursor: showRate ? 'pointer' : 'not-allowed' }}>
               <input type="checkbox" checked={showAmount} disabled={!showRate} onChange={(e) => setShowAmount(e.target.checked)} style={checkboxStyle} />
               <span style={checkTextStyle}>Show amount</span>
+            </label>
+            <label style={checkLabelStyle} title="Allow the quotation to span multiple pages">
+              <input type="checkbox" checked={multiPage} onChange={(e) => setMultiPage(e.target.checked)} style={checkboxStyle} />
+              <span style={checkTextStyle}>Multi-page</span>
             </label>
           </div>
           <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
