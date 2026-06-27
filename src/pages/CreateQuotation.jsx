@@ -29,6 +29,7 @@ export default function CreateQuotation() {
   const [manualGst, setManualGst] = useState(false);
   const [showAmount, setShowAmount] = useState(true);
   const [showRate, setShowRate] = useState(true);
+  const [showWarranty, setShowWarranty] = useState(false);
   const [multiPage, setMultiPage] = useState(false);
   const [custOpen, setCustOpen] = useState(true);
   const [pdfOpen, setPdfOpen] = useState(false);
@@ -68,6 +69,7 @@ export default function CreateQuotation() {
       setManualGst(!!data.manual_gst);
       setShowAmount(data.show_amount !== false);
       setShowRate(data.show_rate !== false);
+      setShowWarranty(!!data.show_warranty);
       setEditMeta({ number: data.number, date: data.date, status: data.status, salesName: data.sales_staff_name });
     })();
     return () => { cancelled = true; };
@@ -82,7 +84,7 @@ export default function CreateQuotation() {
     : todayStr();
 
   function addItem() {
-    setItems((arr) => [...arr, { id: uidCounter++, name: '', qty: 1, total: 0 }]);
+    setItems((arr) => [...arr, { id: uidCounter++, name: '', qty: 1, total: 0, warranty: '' }]);
   }
   function delItem(id) {
     setItems((arr) => arr.filter((it) => it.id !== id));
@@ -99,7 +101,8 @@ export default function CreateQuotation() {
     });
   }
   function setItemField(id, key, value) {
-    setItems((arr) => arr.map((it) => (it.id === id ? { ...it, [key]: key === 'name' ? value : value === '' ? '' : parseFloat(value) || 0 } : it)));
+    const isText = key === 'name' || key === 'warranty';
+    setItems((arr) => arr.map((it) => (it.id === id ? { ...it, [key]: isText ? value : value === '' ? '' : parseFloat(value) || 0 } : it)));
   }
   function toggleManual() {
     setManualGst((m) => {
@@ -114,9 +117,9 @@ export default function CreateQuotation() {
   }
 
   const sheetData = useMemo(() => buildSheetData({
-    company, cust, items, tax, manualGst, showAmount, showRate, terms: terms.content || '', templateId: template.selected,
+    company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms: terms.content || '', templateId: template.selected,
     quoteNo: quoteNoPreview, date: today, salesStaff,
-  }), [company, cust, items, tax, manualGst, showAmount, showRate, terms, template, quoteNoPreview, today, salesStaff]);
+  }), [company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms, template, quoteNoPreview, today, salesStaff]);
 
   useFitSheet(outerRef, wrapRef, innerRef, { maxScale: 1.05, margin: 36 });
 
@@ -196,6 +199,7 @@ export default function CreateQuotation() {
       manual_gst: manualGst,
       show_amount: showAmount,
       show_rate: showRate,
+      show_warranty: showWarranty,
       subtotal: t.subBase,
       cgst_total: t.cgstT,
       sgst_total: t.sgstT,
@@ -313,6 +317,10 @@ export default function CreateQuotation() {
                           <input value={it.total} onChange={(e) => setItemField(it.id, 'total', e.target.value)} inputMode="numeric" style={{ ...inputStyle, font: "600 13px 'JetBrains Mono'", textAlign: 'right' }} />
                         </div>
                       </div>
+                      <div style={{ marginTop: 8, paddingLeft: 30 }}>
+                        <div style={subLabelStyle}>Warranty <span style={{ textTransform: 'none', letterSpacing: 0, color: 'var(--ink-3)', fontWeight: 500 }}>(optional)</span></div>
+                        <input value={it.warranty || ''} onChange={(e) => setItemField(it.id, 'warranty', e.target.value)} placeholder="e.g. 1 Year" style={{ ...inputStyle, font: '500 13px Manrope' }} />
+                      </div>
                       {!manualGst ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
                           <span style={{ font: '600 10px Manrope', color: 'var(--ink-3)' }}>Auto:</span>
@@ -373,6 +381,10 @@ export default function CreateQuotation() {
             <label style={{ ...checkLabelStyle, opacity: showRate ? 1 : 0.45, cursor: showRate ? 'pointer' : 'not-allowed' }}>
               <input type="checkbox" checked={showAmount} disabled={!showRate} onChange={(e) => setShowAmount(e.target.checked)} style={checkboxStyle} />
               <span style={checkTextStyle}>Show amount</span>
+            </label>
+            <label style={checkLabelStyle} title="Show each item's warranty period on the quote (works even when rate is off)">
+              <input type="checkbox" checked={showWarranty} onChange={(e) => setShowWarranty(e.target.checked)} style={checkboxStyle} />
+              <span style={checkTextStyle}>Show warranty</span>
             </label>
             <label style={checkLabelStyle} title="Allow the quotation to span multiple pages">
               <input type="checkbox" checked={multiPage} onChange={(e) => setMultiPage(e.target.checked)} style={checkboxStyle} />

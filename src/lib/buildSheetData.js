@@ -3,16 +3,19 @@ import { TEMPLATES } from '../components/templates.js';
 
 // Builds the single `data` object the QuoteSheet component renders from — shared by
 // the inline live preview, the PDF overlay, and print so they can never drift apart.
-export function buildSheetData({ company, cust, items, tax, manualGst, showAmount, showRate, terms, templateId, quoteNo, date, salesStaff }) {
+export function buildSheetData({ company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms, templateId, quoteNo, date, salesStaff }) {
   const cgstLabel = `CGST (${tax.cgst}%)`;
   const sgstLabel = `SGST (${tax.sgst}%)`;
   // "Show rate" off → a minimal quote: only #, Item, Qty in the table and only the
   // Grand Total in the summary. "Show amount" only applies when rates are shown.
+  // "Show warranty" is independent — it shows even when rate is off.
   const showRateCols = showRate !== false;
   const showAmountCol = showRateCols && showAmount;
+  const showWarrantyCol = !!showWarranty;
   // Numeric columns are sized to their content (auto) so large amounts never overlap;
   // the item-name column (minmax) absorbs the remaining width and shrinks if needed.
   const cols = ['22px', 'minmax(90px,1fr)', 'auto']; // #, item, qty
+  if (showWarrantyCol) cols.push('auto'); // warranty
   if (showRateCols) cols.push('auto', 'auto', 'auto'); // rate, cgst, sgst
   if (showAmountCol) cols.push('auto'); // amount
   const gridCols = cols.join(' ');
@@ -22,7 +25,7 @@ export function buildSheetData({ company, cust, items, tax, manualGst, showAmoun
   const rowsOut = items.map((it, i) => {
     const c = calcItem(it, tax, manualGst);
     subBase += c.base; cgstT += c.cgst; sgstT += c.sgst; grand += c.total;
-    return { idx: i + 1, name: it.name || 'Item', qty: it.qty, rate: money(c.rate), cgst: money(c.cgst), sgst: money(c.sgst), total: money(c.total) };
+    return { idx: i + 1, name: it.name || 'Item', qty: it.qty, warranty: it.warranty || '—', rate: money(c.rate), cgst: money(c.cgst), sgst: money(c.sgst), total: money(c.total) };
   });
 
   return {
@@ -38,7 +41,7 @@ export function buildSheetData({ company, cust, items, tax, manualGst, showAmoun
     },
     items: rowsOut,
     hasItems: rowsOut.length > 0, noItems: rowsOut.length === 0,
-    showAmount: showAmountCol, showRate: showRateCols, showBreakdown: showRateCols,
+    showAmount: showAmountCol, showRate: showRateCols, showWarranty: showWarrantyCol, showBreakdown: showRateCols,
     gridCols, tpl, cgstLabel, sgstLabel,
     subtotal: money(subBase), cgstTotal: money(cgstT), sgstTotal: money(sgstT), grandTotal: money(grand),
     grandWords: grandTotalWords(grand),

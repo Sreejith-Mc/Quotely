@@ -66,6 +66,7 @@ export default function QuoteSheet({ data, printMode }) {
           <div>#</div>
           <div style={{ minWidth: 0 }}>Item</div>
           <div style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>Qty</div>
+          {data.showWarranty && <div style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>Warranty</div>}
           {data.showRate && <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>Rate</div>}
           {data.showRate && <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>{data.cgstLabel}</div>}
           {data.showRate && <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>{data.sgstLabel}</div>}
@@ -79,6 +80,7 @@ export default function QuoteSheet({ data, printMode }) {
                 <div style={{ color: '#9aa39c', fontFamily: tpl.mono, fontSize: 11 }}>{item.idx}</div>
                 <div style={{ fontWeight: 600, color: '#16201b', minWidth: 0, overflowWrap: 'anywhere' }}>{item.name}</div>
                 <div style={{ textAlign: 'center', fontFamily: tpl.mono, color: '#4a564e', whiteSpace: 'nowrap' }}>{item.qty}</div>
+                {data.showWarranty && <div style={{ textAlign: 'center', color: '#4a564e', whiteSpace: 'nowrap' }}>{item.warranty}</div>}
                 {data.showRate && <div style={{ textAlign: 'right', fontFamily: tpl.mono, color: '#4a564e', whiteSpace: 'nowrap' }}>{item.rate}</div>}
                 {data.showRate && <div style={{ textAlign: 'right', fontFamily: tpl.mono, color: '#4a564e', whiteSpace: 'nowrap' }}>{item.cgst}</div>}
                 {data.showRate && <div style={{ textAlign: 'right', fontFamily: tpl.mono, color: '#4a564e', whiteSpace: 'nowrap' }}>{item.sgst}</div>}
