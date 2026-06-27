@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</helmet>
+<div style="width:794px; min-height:1123px; background:#ffffff; color:#16201b; font-family:{{ data.tpl.font }}; padding:52px 52px 40px; box-sizing:border-box; position:relative; display:flex; flex-direction:column;">
+
+  <!-- ===== Letterhead ===== -->
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:24px;">
+    <div style="display:flex; flex-direction:column; gap:14px;">
+      <img src="{{ data.company.logoSrc }}" alt="logo" style="height:48px; width:auto; object-fit:contain; align-self:flex-start;">
+      <div style="font-size:11px; line-height:1.6; color:#4a564e; max-width:300px; white-space:pre-line;">{{ data.company.address }}</div>
+      <div style="display:flex; flex-direction:column; gap:2px; font-size:11px; color:#4a564e;">
+        <sc-if value="{{ data.company.hasPhone }}" hint-placeholder-val="{{ true }}"><div><span style="color:#9aa39c;">T&nbsp;&nbsp;</span>{{ data.company.phone }}</div></sc-if>
+        <sc-if value="{{ data.company.hasEmail }}" hint-placeholder-val="{{ true }}"><div><span style="color:#9aa39c;">E&nbsp;&nbsp;</span>{{ data.company.email }}</div></sc-if>
+        <sc-if value="{{ data.company.hasWebsite }}" hint-placeholder-val="{{ true }}"><div><span style="color:#9aa39c;">W&nbsp;</span>{{ data.company.website }}</div></sc-if>
+        <sc-if value="{{ data.company.hasGst }}" hint-placeholder-val="{{ true }}"><div><span style="color:#9aa39c;">GSTIN&nbsp;</span>{{ data.company.gst }}</div></sc-if>
+      </div>
+    </div>
+    <div style="text-align:right; flex-shrink:0;">
+      <div style="font-size:30px; font-weight:800; letter-spacing:0.14em; color:{{ data.tpl.acc }}; line-height:1;">QUOTATION</div>
+      <div style="margin-top:18px; display:inline-grid; grid-template-columns:auto auto; gap:6px 14px; font-size:11px; text-align:left;">
+        <div style="color:#9aa39c; text-transform:uppercase; letter-spacing:0.08em;">No.</div>
+        <div style="font-family:{{ data.tpl.mono }}; font-weight:600; color:#16201b;">{{ data.quoteNo }}</div>
+        <div style="color:#9aa39c; text-transform:uppercase; letter-spacing:0.08em;">Date</div>
+        <div style="font-family:{{ data.tpl.mono }}; color:#16201b;">{{ data.date }}</div>
+        <div style="color:#9aa39c; text-transform:uppercase; letter-spacing:0.08em;">Staff</div>
+        <div style="font-weight:600; color:#16201b;">{{ data.salesStaff }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:3px; background:{{ data.tpl.acc }}; margin:22px 0 0; border-radius:2px;"></div>
+
+  <!-- ===== Bill To ===== -->
+  <div style="margin-top:22px;">
+    <div style="font-size:10px; text-transform:uppercase; letter-spacing:0.14em; color:{{ data.tpl.acc }}; font-weight:700; margin-bottom:7px;">Quotation For</div>
+    <div style="font-size:15px; font-weight:700; color:#16201b;">{{ data.customer.name }}</div>
+    <sc-if value="{{ data.customer.hasCompany }}" hint-placeholder-val="{{ true }}"><div style="font-size:12px; color:#4a564e; margin-top:1px;">{{ data.customer.company }}</div></sc-if>
+    <div style="font-size:11px; color:#6b766e; margin-top:5px; line-height:1.6; white-space:pre-line;">{{ data.customer.address }}</div>
+    <div style="display:flex; flex-wrap:wrap; gap:4px 18px; font-size:11px; color:#6b766e; margin-top:5px;">
+      <sc-if value="{{ data.customer.hasPhone }}" hint-placeholder-val="{{ true }}"><div>{{ data.customer.phone }}</div></sc-if>
+      <sc-if value="{{ data.customer.hasEmail }}" hint-placeholder-val="{{ true }}"><div>{{ data.customer.email }}</div></sc-if>
+    </div>
+  </div>
+
+  <!-- ===== Items table ===== -->
+  <div style="margin-top:26px; border:1px solid #e7ebe7; border-radius:10px; overflow:hidden;">
+    <div style="display:grid; grid-template-columns:{{ data.gridCols }}; background:{{ data.tpl.acc }}; padding:11px 14px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:{{ data.tpl.theadFg }};">
+      <div>#</div>
+      <div>Item</div>
+      <div style="text-align:center;">Qty</div>
+      <div style="text-align:right;">Rate</div>
+      <div style="text-align:right;">{{ data.cgstLabel }}</div>
+      <div style="text-align:right;">{{ data.sgstLabel }}</div>
+      <sc-if value="{{ data.showAmount }}" hint-placeholder-val="{{ true }}"><div style="text-align:right;">Amount</div></sc-if>
+    </div>
+
+    <sc-if value="{{ data.hasItems }}" hint-placeholder-val="{{ true }}">
+    <div>
+      <sc-for list="{{ data.items }}" as="item" hint-placeholder-count="3">
+        <div style="display:grid; grid-template-columns:{{ data.gridCols }}; padding:13px 14px; font-size:12px; align-items:start; border-top:1px solid #eef1ee;">
+          <div style="color:#9aa39c; font-family:{{ data.tpl.mono }}; font-size:11px;">{{ item.idx }}</div>
+          <div style="font-weight:600; color:#16201b; padding-right:8px;">{{ item.name }}</div>
+          <div style="text-align:center; font-family:{{ data.tpl.mono }}; color:#4a564e;">{{ item.qty }}</div>
+          <div style="text-align:right; font-family:{{ data.tpl.mono }}; color:#4a564e;">{{ item.rate }}</div>
+          <div style="text-align:right; font-family:{{ data.tpl.mono }}; color:#4a564e;">{{ item.cgst }}</div>
+          <div style="text-align:right; font-family:{{ data.tpl.mono }}; color:#4a564e;">{{ item.sgst }}</div>
+          <sc-if value="{{ data.showAmount }}" hint-placeholder-val="{{ true }}"><div style="text-align:right; font-family:{{ data.tpl.mono }}; font-weight:600; color:#16201b;">{{ item.total }}</div></sc-if>
+        </div>
+      </sc-for>
+    </div>
+    </sc-if>
+    <sc-if value="{{ data.noItems }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:34px 14px; text-align:center; font-size:12px; color:#b7bfb8; border-top:1px solid #eef1ee;">No items added yet</div>
+    </sc-if>
+  </div>
+
+  <!-- ===== Summary ===== -->
+  <div style="display:flex; justify-content:flex-end; margin-top:22px;">
+    <div style="width:320px;">
+      <div style="display:flex; justify-content:space-between; font-size:12px; padding:6px 0; color:#4a564e;">
+        <span>Subtotal</span><span style="font-family:{{ data.tpl.mono }};">{{ data.subtotal }}</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:12px; padding:6px 0; color:#4a564e; border-top:1px solid #eef1ee;">
+        <span>{{ data.cgstLabel }}</span><span style="font-family:{{ data.tpl.mono }};">{{ data.cgstTotal }}</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:12px; padding:6px 0; color:#4a564e; border-top:1px solid #eef1ee;">
+        <span>{{ data.sgstLabel }}</span><span style="font-family:{{ data.tpl.mono }};">{{ data.sgstTotal }}</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding:13px 16px; background:{{ data.tpl.accSoft }}; border-radius:10px;">
+        <span style="font-size:13px; font-weight:700; color:{{ data.tpl.acc }};">Grand Total</span>
+        <span style="font-family:{{ data.tpl.mono }}; font-size:17px; font-weight:700; color:{{ data.tpl.acc }};">{{ data.grandTotal }}</span>
+      </div>
+      <div style="margin-top:10px; text-align:right;">
+        <div style="font-size:9px; text-transform:uppercase; letter-spacing:0.12em; color:#9aa39c; font-weight:700; margin-bottom:3px;">Amount in words</div>
+        <div style="font-size:11px; color:#16201b; line-height:1.5; font-style:italic;">{{ data.grandWords }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Terms + seal ===== -->
+  <div style="display:flex; justify-content:space-between; gap:30px; margin-top:34px; align-items:flex-end; flex:1;">
+    <div style="flex:1; max-width:380px;">
+      <div style="font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:{{ data.tpl.acc }}; font-weight:700; margin-bottom:8px;">Terms &amp; Conditions</div>
+      <ol style="margin:0; padding-left:16px; display:flex; flex-direction:column; gap:5px;">
+        <sc-for list="{{ data.terms }}" as="t" hint-placeholder-count="3">
+          <li style="font-size:11px; color:#6b766e; line-height:1.5;">{{ t.text }}</li>
+        </sc-for>
+      </ol>
+    </div>
+    <div style="width:150px; height:150px; flex-shrink:0; position:relative; display:flex; align-items:center; justify-content:center;">
+      <div style="position:absolute; inset:0; border:2px solid rgba(124,24,37,0.55); border-radius:50%; transform:rotate(-9deg);"></div>
+      <div style="position:absolute; inset:9px; border:1px solid rgba(124,24,37,0.35); border-radius:50%; transform:rotate(-9deg);"></div>
+      <div style="text-align:center; transform:rotate(-9deg); color:rgba(124,24,37,0.7);">
+        <div style="font-size:9px; letter-spacing:0.16em; font-weight:700;">★ AUTHORISED ★</div>
+        <div style="font-size:14px; font-weight:800; margin:5px 0; letter-spacing:0.04em;">{{ data.company.sealName }}</div>
+        <div style="font-size:8px; letter-spacing:0.18em; font-weight:600;">SINCE 1994</div>
+        <div style="font-size:8px; letter-spacing:0.1em; margin-top:4px; color:rgba(124,24,37,0.5);">SIGNATORY</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:26px; padding-top:14px; border-top:1px solid #eef1ee; text-align:center; font-size:10px; color:#9aa39c; letter-spacing:0.02em;">
+    This is an electronically generated document. No signature is required.
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:794,&quot;height&quot;:1123},&quot;data&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;any&quot;}}"></script>
+</body>
+</html>

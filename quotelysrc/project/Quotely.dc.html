@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{ -webkit-font-smoothing:antialiased; }
+  ::selection{ background:rgba(34,103,58,0.18); }
+  input::placeholder,textarea::placeholder{ color:var(--ink-3); }
+  @keyframes toastIn{ from{ opacity:0; transform:translate(-50%,16px); } to{ opacity:1; transform:translate(-50%,0); } }
+  @keyframes rowIn{ from{ opacity:0; transform:translateY(-6px); } to{ opacity:1; transform:translateY(0); } }
+  @keyframes pop{ 0%{ transform:scale(0.6); opacity:0; } 60%{ transform:scale(1.08); } 100%{ transform:scale(1); opacity:1; } }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  @keyframes fadeIn{ from{ opacity:0; } to{ opacity:1; } }
+  @media print{ body *{ visibility:hidden !important; } .print-sheet,.print-sheet *{ visibility:visible !important; } .print-sheet{ position:absolute !important; left:0; top:0; transform:none !important; } }
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="--bg:#eef2ee; --panel:#ffffff; --panel-2:#f7f9f7; --border:#e6eae6; --ink:#16201b; --ink-2:#5c685f; --ink-3:#9aa39c; --field:#f4f7f4; --green:#22673a; --green-2:#2f8f57; --green-soft:#eef4ef; --maroon:#7c1825; --shadow:0 1px 2px rgba(20,40,28,0.04),0 8px 24px rgba(20,40,28,0.06); font-family:'Manrope',sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; transition:background .3s;">
+
+<!-- ============ APP SHELL (header) ============ -->
+<sc-if value="{{ showShell }}" hint-placeholder-val="{{ true }}">
+<header style="position:sticky; top:0; z-index:40; background:var(--panel); border-bottom:1px solid var(--border); padding:0 24px; height:62px; display:flex; align-items:center; justify-content:space-between; backdrop-filter:saturate(1.4) blur(8px);">
+  <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onClick="{{ goCreate }}">
+    <div style="width:30px; height:30px; border-radius:9px; background:var(--green); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:16px;">Q</div>
+    <div style="font-weight:800; font-size:17px; letter-spacing:-0.01em;">Quotely</div>
+    <div style="font-size:10px; font-weight:600; color:var(--ink-3); border:1px solid var(--border); border-radius:6px; padding:2px 6px; margin-left:2px;">v2.0</div>
+  </div>
+
+  <div style="display:flex; align-items:center; gap:8px;">
+    <button onClick="{{ goCreate }}" style="border:none; cursor:pointer; font:600 13px Manrope; padding:8px 14px; border-radius:10px; background:{{ createPillBg }}; color:{{ createPillFg }};">Create Quotation</button>
+    <button onClick="{{ goDash }}" style="border:none; cursor:pointer; font:600 13px Manrope; padding:8px 14px; border-radius:10px; background:{{ dashPillBg }}; color:{{ dashPillFg }};">Dashboard</button>
+  </div>
+
+  <div style="display:flex; align-items:center; gap:6px; position:relative;">
+    <button onClick="{{ toggleMenu }}" title="All screens" style="display:flex; align-items:center; gap:6px; border:1px solid var(--border); background:var(--panel); color:var(--ink-2); cursor:pointer; font:600 12px Manrope; padding:8px 11px; border-radius:10px;">▦ Screens</button>
+    <button onClick="{{ toggleDark }}" title="Toggle theme" style="width:36px; height:36px; border:1px solid var(--border); background:var(--panel); color:var(--ink-2); cursor:pointer; border-radius:10px; font-size:15px;">{{ themeIcon }}</button>
+
+    <sc-if value="{{ loggedIn }}" hint-placeholder-val="{{ true }}">
+      <button onClick="{{ toggleProfile }}" style="display:flex; align-items:center; gap:9px; border:1px solid var(--border); background:var(--panel); cursor:pointer; padding:5px 12px 5px 6px; border-radius:11px; margin-left:2px;">
+        <span style="width:28px; height:28px; border-radius:8px; background:var(--green-soft); color:var(--green); display:flex; align-items:center; justify-content:center; font:700 12px Manrope;">{{ empInitials }}</span>
+        <span style="text-align:left; line-height:1.15;"><span style="display:block; font:700 12px Manrope; color:var(--ink);">{{ empName }}</span><span style="display:block; font:500 10px Manrope; color:var(--ink-3);">{{ empRole }}</span></span>
+      </button>
+    </sc-if>
+    <sc-if value="{{ loggedOut }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ goAdminLogin }}" style="border:none; cursor:pointer; font:700 13px Manrope; padding:9px 16px; border-radius:10px; background:var(--green); color:#fff; margin-left:2px;">Admin Login</button>
+    </sc-if>
+
+    <!-- screens dropdown -->
+    <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; top:48px; right:0; width:230px; background:var(--panel); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow); padding:6px; z-index:50; animation:fadeIn .12s;">
+        <div style="font:700 10px Manrope; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.08em; padding:8px 10px 4px;">Deliverable screens</div>
+        <sc-for list="{{ screenLinks }}" as="s" hint-placeholder-count="6">
+          <button onClick="{{ s.go }}" style="display:flex; width:100%; align-items:center; gap:10px; border:none; background:transparent; cursor:pointer; font:600 12.5px Manrope; color:var(--ink); padding:9px 10px; border-radius:9px; text-align:left;" style-hover="background:var(--green-soft);"><span style="width:18px; text-align:center; color:var(--ink-3);">{{ s.icon }}</span>{{ s.label }}</button>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ profileOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; top:48px; right:0; width:200px; background:var(--panel); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow); padding:6px; z-index:50; animation:fadeIn .12s;">
+        <button onClick="{{ goProfile }}" style="display:flex; width:100%; align-items:center; gap:10px; border:none; background:transparent; cursor:pointer; font:600 12.5px Manrope; color:var(--ink); padding:10px; border-radius:9px;" style-hover="background:var(--green-soft);">⚙ Edit Profile</button>
+        <button onClick="{{ logout }}" style="display:flex; width:100%; align-items:center; gap:10px; border:none; background:transparent; cursor:pointer; font:600 12.5px Manrope; color:var(--maroon); padding:10px; border-radius:9px;" style-hover="background:rgba(124,24,37,0.07);">⏻ Log out</button>
+      </div>
+    </sc-if>
+  </div>
+</header>
+</sc-if>
+
+<!-- ============ CREATE QUOTATION ============ -->
+<sc-if value="{{ isCreate }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid; grid-template-columns:minmax(380px,42fr) 58fr; gap:0; align-items:stretch; min-height:calc(100vh - 62px);">
+
+  <!-- LEFT : builder -->
+  <div style="padding:24px; overflow:auto; max-height:calc(100vh - 62px); display:flex; flex-direction:column; gap:16px;">
+    <div>
+      <h1 style="margin:0; font-size:22px; font-weight:800; letter-spacing:-0.02em;">New Quotation</h1>
+      <p style="margin:4px 0 0; font-size:13px; color:var(--ink-2);">Fill in the details — the document on the right updates live.</p>
+    </div>
+
+    <!-- always-visible quote header chips -->
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+      <div style="background:var(--panel); border:1px solid var(--border); border-radius:13px; padding:12px 14px;"><div style="font:600 10px Manrope; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.07em;">Quotation No.</div><div style="font:600 14px 'JetBrains Mono'; color:var(--green); margin-top:3px;">{{ quoteNo }}</div></div>
+      <div style="background:var(--panel); border:1px solid var(--border); border-radius:13px; padding:12px 14px;"><div style="font:600 10px Manrope; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.07em;">Date</div><div style="font:600 13px 'JetBrains Mono'; color:var(--ink); margin-top:3px;">{{ today }}</div></div>
+      <div style="background:var(--panel); border:1px solid var(--border); border-radius:13px; padding:12px 14px;"><div style="font:600 10px Manrope; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.07em;">Sales Staff</div><div style="font:700 13px Manrope; color:var(--ink); margin-top:3px;">{{ salesStaff }}</div></div>
+    </div>
+
+    <!-- Customer card -->
+    <div style="background:var(--panel); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); overflow:hidden; flex-shrink:0;">
+      <button onClick="{{ toggleCustomer }}" style="width:100%; display:flex; align-items:center; justify-content:space-between; border:none; background:transparent; cursor:pointer; padding:16px 18px;">
+        <span style="display:flex; align-items:center; gap:10px;"><span style="width:26px; height:26px; border-radius:8px; background:var(--green-soft); color:var(--green); display:flex; align-items:center; justify-content:center; font-size:13px;">①</span><span style="font:700 14px Manrope; color:var(--ink);">Customer Details</span></span>
+        <span style="color:var(--ink-3); font-size:13px; transition:transform .2s; transform:rotate({{ custChevron }});">▾</span>
+      </button>
+      <sc-if value="{{ custOpen }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:0 18px 18px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div style="grid-column:1/3;"><label style="font:600 11px Manrope; color:var(--ink-2); display:block; margin-bottom:6px;">Customer Name <span style="color:var(--green); font-weight:700;">*</span></label><input value="{{ cust.name }}" onInput="{{ h.custName }}" placeholder="e.g. Rohan Mehta" style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:10px; font:500 13px Manrope; outline:none; transition:.15s;" style-focus="border-color:var(--green); background:var(--panel);"></div>
+        <div><label style="font:600 11px Manrope; color:var(--ink-2); display:block; margin-bottom:6px;">Company <span style="color:var(--ink-3); font-weight:500;">(optional)</span></label><input value="{{ cust.company }}" onInput="{{ h.custCompany }}" placeholder="Apex Manufacturing" style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:10px; font:500 13px Manrope; outline:none;" style-focus="border-color:var(--green); background:var(--panel);"></div>
+        <div><label style="font:600 11px Manrope; color:var(--ink-2); display:block; margin-bottom:6px;">Phone <span style="color:var(--ink-3); font-weight:500;">(optional)</span></label><input value="{{ cust.phone }}" onInput="{{ h.custPhone }}" placeholder="+91 …" style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:10px; font:500 13px Manrope; outline:none;" style-focus="border-color:var(--green); background:var(--panel);"></div>
+        <div style="grid-column:1/3;"><label style="font:600 11px Manrope; color:var(--ink-2); display:block; margin-bottom:6px;">Address <span style="color:var(--ink-3); font-weight:500;">(optional)</span></label><textarea value="{{ cust.address }}" onInput="{{ h.custAddress }}" rows="2" placeholder="Street, City, State, PIN" style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:10px; font:500 13px Manrope; outline:none; resize:vertical;" style-focus="border-color:var(--green); background:var(--panel);"></textarea></div>
+        <div style="grid-column:1/3;"><label style="font:600 11px Manrope; color:var(--ink-2); display:block; margin-bottom:6px;">Email <span style="color:var(--ink-3); font-weight:500;">(optional)</span></label><input value="{{ cust.email }}" onInput="{{ h.custEmail }}" placeholder="name@company.com" style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:10px; font:500 13px Manrope; outline:none;" style-focus="border-color:var(--green); background:var(--panel);"></div>
+      </div>
+      </sc-if>
+    </div>
+
+    <!-- Items card -->
+    <div style="background:var(--panel); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); overflow:hidden; flex-shrink:0;">
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 18px;">
+        <span style="display:flex; align-items:center; gap:10px;"><span style="width:26px; height:26px; border-radius:8px; background:var(--green-soft); color:var(--green); display:flex; align-items:center; justify-content:center; font-size:13px;">②</span><span style="font:700 14px Manrope; color:var(--ink);">Item Details</span><span style="font:600 11px Manrope; color:var(--ink-3); background:var(--panel-2); border-radius:20px; padding:2px 9px;">{{ itemCount }}</span></span>
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none;">
+          <span style="font:600 11px Manrope; color:var(--ink-2);">Manual GST</span>
+          <span onClick="{{ toggleManual }}" style="width:38px; height:22px; border-radius:20px; background:{{ manualTrackBg }}; position:relative; transition:.2s; display:inline-block;"><span style="position:absolute; top:2px; left:{{ manualKnobX }}; width:18px; height:18px; border-radius:50%; background:#fff; transition:.2s; box-shadow:0 1px 2px rgba(0,0,0,.2);"></span></span>
+        </label>
+      </div>
+
+      <div style="padding:0 14px;">
+        <sc-if value="{{ hasRows }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <sc-for list="{{ rows }}" as="r" hint-placeholder-count="3">
+            <div style="border:1px solid var(--border); border-radius:12px; padding:11px 12px; background:var(--panel-2); animation:rowIn .18s ease;">
+              <div style="display:flex; gap:8px; align-items:center;">
+                <span style="width:22px; height:22px; flex-shrink:0; border-radius:6px; background:var(--green-soft); color:var(--green); display:flex; align-items:center; justify-content:center; font:700 11px 'JetBrains Mono';">{{ r.idx }}</span>
+                <input value="{{ r.name }}" onInput="{{ r.onName }}" placeholder="Item or service name" style="flex:1; min-width:0; box-sizing:border-box; padding:10px 12px; border:1px solid var(--border); background:var(--panel); color:var(--ink); border-radius:9px; font:600 13px Manrope; outline:none;" style-focus="border-color:var(--green);">
+                <button onClick="{{ r.onDel }}" title="Delete" style="width:30px; height:30px; flex-shrink:0; border:none; background:transparent; color:var(--ink-3); cursor:pointer; border-radius:8px; font-size:15px;" style-hover="background:rgba(124,24,37,0.08); color:var(--maroon);">✕</button>
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1.4fr; gap:8px; margin-top:8px; padding-left:30px;">
+                <div><div style="font:600 9px Manrope; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Quantity</div><input value="{{ r.qty }}" onInput="{{ r.onQty }}" inputmode="numeric" style="width:100%; box-sizing:border-box; padding:9px 11px; border:1px solid var(--border); background:var(--panel); color:var(--ink); border-radius:9px; font:600 13px 'JetBrains Mono'; outline:none;" style-focus="border-color:var(--green);"></div>
+                <div><div style="font:600 9px Manrope; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Total Amount (₹)</div><input value="{{ r.total }}" onInput="{{ r.onTotal }}" inputmode="numeric" style="width:100%; box-sizing:border-box; padding:9px 11px; border:1px solid var(--border); background:var(--panel); color:var(--ink); border-radius:9px; font:600 13px 'JetBrains Mono'; text-align:right; outline:none;" style-focus="border-color:var(--green);"></div>
+              </div>
+              <!-- auto breakdown -->
+              <sc-if value="{{ r.auto }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex; align-items:center; gap:6px; margin-top:8px; flex-wrap:wrap;">
+                  <span style="font:600 10px Manrope; color:var(--ink-3);">Auto:</span>
+                  <span style="font:500 10.5px 'JetBrains Mono'; color:var(--ink-2); background:var(--panel); border:1px solid var(--border); border-radius:7px; padding:3px 8px;">Rate {{ r.rate }}</span>
+                  <span style="font:500 10.5px 'JetBrains Mono'; color:var(--ink-2); background:var(--panel); border:1px solid var(--border); border-radius:7px; padding:3px 8px;">{{ cgstLabel }} {{ r.cgst }}</span>
+                  <span style="font:500 10.5px 'JetBrains Mono'; color:var(--ink-2); background:var(--panel); border:1px solid var(--border); border-radius:7px; padding:3px 8px;">{{ sgstLabel }} {{ r.sgst }}</span>
+                  <button onClick="{{ r.onDup }}" style="margin-left:auto; border:none; background:transparent; color:var(--green); cursor:pointer; font:600 11px Manrope;" style-hover="text-decoration:underline;">⧉ Duplicate</button>
+                </div>
+              </sc-if>
+              <!-- manual fields -->
+              <sc-if value="{{ r.manual }}" hint-placeholder-val="{{ false }}">
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:7px; margin-top:8px;">
+                  <div><div style="font:600 9px Manrope; color:var(--ink-3); margin-bottom:3px;">RATE / UNIT</div><input value="{{ r.rateRaw }}" onInput="{{ r.onRate }}" inputmode="numeric" style="width:100%; box-sizing:border-box; padding:7px 9px; border:1px solid var(--border); background:var(--panel); color:var(--ink); border-radius:8px; font:500 12px 'JetBrains Mono'; outline:none;" style-focus="border-color:var(--green);"></div>
+                  <div><div style="font:600 9px Manrope; color:var(--ink-3); margin-bottom:3px;">{{ cgstLabel }}</div><input value="{{ r.cgstRaw }}" onInput="{{ r.onCgst }}" inputmode="numeric" style="width:100%; box-sizing:border-box; padding:7px 9px; border:1px solid var(--border); background:var(--panel); color:var(--ink); border-radius:8px; font:500 12px 'JetBrains Mono'; outline:none;" style-focus="border-color:var(--green);"></div>
+                  <div><div style="font:600 9px Manrope; color:var(--ink-3); margin-bottom:3px;">{{ sgstLabel }}</div><input value="{{ r.sgstRaw }}" onInput="{{ r.onSgst }}" inputmode="numeric" style="width:100%; box-sizing:border-box; padding:7px 9px; border:1px solid var(--border); background:var(--panel); color:var(--ink); border-radius:8px; font:500 12px 'JetBrains Mono'; outline:none;" style-focus="border-color:var(--green);"></div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+        </sc-if>
+
+        <!-- empty state -->
+        <sc-if value="{{ noRows }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align:center; padding:30px 16px;">
+            <div style="position:relative; width:64px; height:54px; margin:0 auto 14px;">
+              <div style="position:absolute; inset:0 8px; border:1.5px dashed var(--border); border-radius:8px; transform:rotate(-7deg);"></div>
+              <div style="position:absolute; inset:0 8px; border:1.5px solid var(--border); border-radius:8px; background:var(--panel); transform:rotate(4deg);"></div>
+              <div style="position:absolute; inset:6px 14px; display:flex; flex-direction:column; gap:5px; padding-top:12px;"><span style="height:4px; background:var(--green-soft); border-radius:3px;"></span><span style="height:4px; width:70%; background:var(--panel-2); border-radius:3px;"></span></div>
+            </div>
+            <div style="font:700 13px Manrope; color:var(--ink);">No items added yet</div>
+            <div style="font:500 12px Manrope; color:var(--ink-3); margin-top:3px;">Add your first line item to start building the quote.</div>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="display:flex; gap:8px; padding:14px 18px;">
+        <button onClick="{{ addItem }}" style="flex:1; border:1.5px dashed var(--green); background:var(--green-soft); color:var(--green); cursor:pointer; font:700 13px Manrope; padding:11px; border-radius:11px;" style-hover="background:var(--green); color:#fff;">+ Add Item</button>
+        <sc-if value="{{ hasRows }}" hint-placeholder-val="{{ true }}"><button onClick="{{ clearItems }}" style="border:1px solid var(--border); background:var(--panel); color:var(--ink-2); cursor:pointer; font:600 13px Manrope; padding:11px 16px; border-radius:11px;" style-hover="color:var(--maroon); border-color:var(--maroon);">Clear all</button></sc-if>
+      </div>
+    </div>
+
+    <!-- Summary card -->
+    <div style="background:var(--green); border-radius:16px; padding:18px 20px; box-shadow:var(--shadow); color:#eaf3ec; flex-shrink:0;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;"><span style="font:700 13px Manrope; color:#fff;">Live Summary</span><span style="font:600 10px Manrope; color:rgba(255,255,255,0.65); text-transform:uppercase; letter-spacing:0.06em;">{{ gstMode }}</span></div>
+      <div style="display:flex; justify-content:space-between; font:500 13px Manrope; padding:4px 0;"><span style="color:rgba(255,255,255,0.78);">Subtotal</span><span style="font-family:'JetBrains Mono';">{{ subtotal }}</span></div>
+      <div style="display:flex; justify-content:space-between; font:500 13px Manrope; padding:4px 0;"><span style="color:rgba(255,255,255,0.78);">{{ cgstLabel }}</span><span style="font-family:'JetBrains Mono';">{{ cgstTotal }}</span></div>
+      <div style="display:flex; justify-content:space-between; font:500 13px Manrope; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.16); padding-bottom:10px;"><span style="color:rgba(255,255,255,0.78);">{{ sgstLabel }}</span><span style="font-family:'JetBrains Mono';">{{ sgstTotal }}</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:12px;"><span style="font:800 15px Manrope; color:#fff;">Grand Total</span><span style="font:700 24px 'JetBrains Mono'; color:#fff;">{{ grandTotal }}</span></div>
+      <div style="font:500 11px Manrope; color:rgba(255,255,255,0.7); margin-top:6px; font-style:italic; line-height:1.45;">{{ grandWords }}</div>
+    </div>
+
+    <div style="height:8px;"></div>
+  </div>
+
+  <!-- RIGHT : preview -->
+  <div style="background:var(--bg); border-left:1px solid var(--border); display:flex; flex-direction:column; max-height:calc(100vh - 62px);">
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 22px; border-bottom:1px solid var(--border); background:var(--panel);">
+      <div style="display:flex; align-items:center; gap:14px;"><span style="font:700 13px Manrope; color:var(--ink);">Live Preview</span><label style="display:flex; align-items:center; gap:7px; cursor:pointer; user-select:none;"><span onClick="{{ toggleAmount }}" style="width:36px; height:21px; border-radius:20px; background:{{ amountTrackBg }}; position:relative; transition:.2s; display:inline-block; flex-shrink:0;"><span style="position:absolute; top:2px; left:{{ amountKnobX }}; width:17px; height:17px; border-radius:50%; background:#fff; transition:.2s; box-shadow:0 1px 2px rgba(0,0,0,.2);"></span></span><span style="font:600 11px Manrope; color:var(--ink-2);">Show amounts</span></label></div>
+      <div style="display:flex; gap:7px;">
+        <button onClick="{{ openPdf }}" style="border:1px solid var(--border); background:var(--panel); color:var(--ink); cursor:pointer; font:600 12px Manrope; padding:8px 13px; border-radius:9px;" style-hover="border-color:var(--green); color:var(--green);">⤢ Preview</button>
+        <button onClick="{{ doPrint }}" style="border:1px solid var(--border); background:var(--panel); color:var(--ink); cursor:pointer; font:600 12px Manrope; padding:8px 13px; border-radius:9px;" style-hover="border-color:var(--green); color:var(--green);">⎙ Print</button>
+        <button onClick="{{ downloadPdf }}" style="border:none; background:var(--green); color:#fff; cursor:pointer; font:700 12px Manrope; padding:8px 14px; border-radius:9px;" style-hover="filter:brightness(1.08);">↓ Download PDF</button>
+      </div>
+    </div>
+    <div ref="{{ previewOuterRef }}" style="flex:1; overflow:hidden; padding:20px; display:flex; align-items:center; justify-content:center;">
+      <div ref="{{ sheetWrapRef }}" style="position:relative; overflow:hidden; box-shadow:0 1px 3px rgba(20,40,28,0.10),0 18px 50px rgba(20,40,28,0.16); border-radius:3px;">
+        <div ref="{{ sheetInnerRef }}" style="width:794px; background:#fff;">
+          <dc-import name="QuoteSheet" data="{{ sheetData }}" hint-size="794px,1123px"></dc-import>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 22px; border-top:1px solid var(--border); background:var(--panel);">
+      <span style="font:500 11px Manrope; color:var(--ink-3);">Fits to view · exported as pixel-perfect A4 PDF</span>
+      <button onClick="{{ generate }}" style="border:none; background:var(--green); color:#fff; cursor:pointer; font:700 13px Manrope; padding:10px 20px; border-radius:11px; box-shadow:var(--shadow);" style-hover="filter:brightness(1.08);">Generate Quotation →</button>
+    </div>
+  </div>
+</div>
+
+<!-- floating mobile actions -->
+<div style="position:fixed; bottom:18px; left:50%; transform:translateX(-50%); z-index:30; display:none; gap:8px; background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:8px; box-shadow:var(--shadow);" id="mobile-fab">
+  <button onClick="{{ openPdf }}" style="border:none; background:var(--panel-2); color:var(--ink); cursor:pointer; font:600 12px Manrope; padding:10px 16px; border-radius:11px;">Preview</button>
+  <button onClick="{{ downloadPdf }}" style="border:none; background:var(--green); color:#fff; cursor:pointer; font:700 12px Manrope; padding:10px 16px; border-radius:11px;">Download</button>
+  <button onClick="{{ doPrint }}" style="border:none; background:var(--panel-2); color:var(--ink); cursor:pointer; font:600 12px Manrope; padding:10px 16px; border-radius:11px;">Print</button>
+</div>
+</sc-if>
+
+<!-- ============ ADMIN DASHBOARD ============ -->
+<sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid; grid-template-columns:232px 1fr; min-height:calc(100vh - 62px);">
+  <!-- sidebar -->
+  <aside style="border-right:1px solid var(--border); background:var(--panel); padding:18px 12px; display:flex; flex-direction:column; gap:3px;">
+    <div style="font:700 10px Manrope; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.08em; padding:6px 12px 8px;">Admin</div>
+    <sc-for list="{{ adminNav }}" as="n" hint-placeholder-count="9">
+      <button onClick="{{ n.go }}" style="display:flex; align-items:center; gap:11px; border:none; cursor:pointer; font:600 13px Manrope; padding:10px 12px; border-radius:10px; text-align:left; background:{{ n.bg }}; color:{{ n.fg }};"><span style="width:18px; text-align:center;">{{ n.icon }}</span>{{ n.label }}</button>
+    </sc-for>
+    <div style="margin-top:auto; padding:12px; border-top:1px solid var(--border);"><div style="font:600 11px Manrope; color:var(--ink-2);">Signed in as Admin</div><div style="font:500 11px Manrope; color:var(--ink-3); margin-top:2px;">admin@logtech.in</div></div>
+  </aside>
+
+  <!-- content -->
+  <main style="padding:30px 34px; overflow:auto; max-height:calc(100vh - 62px);">
+    <div style="margin-bottom:22px;"><h1 style="margin:0; font:800 24px Manrope; letter-spacing:-0.02em;">{{ adminTitle }}</h1><p style="margin:5px 0 0; font:500 13px Manrope; color:var(--ink-2);">{{ adminSub }}</p></div>
+
+    <!-- DASHBOARD OVERVIEW -->
+    <sc-if value="{{ tabOverview }}" hint-placeholder-val="{{ true }}">
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:14px;">
+        <sc-for list="{{ stats }}" as="st" hint-placeholder-count="3">
+          <div style="background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow:var(--shadow);"><div style="font:600 11px Manrope; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.06em;">{{ st.label }}</div><div style="font:800 26px 'JetBrains Mono'; color:var(--ink); margin:8px 0 2px;">{{ st.value }}</div><div style="font:600 11px Manrope; color:var(--green);">{{ st.delta }}</div></div>
+        </sc-for>
+      </div>
+      <div style="background:var(--panel); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); margin-top:16px; overflow:hidden;">
+        <div style="padding:16px 18px; border-bottom:1px solid var(--border); font:700 14px Manrope;">Recent Quotations</div>
+        <div style="display:grid; grid-template-columns:120px 1fr 120px 110px; padding:11px 18px; font:600 10px Manrope; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.06em; border-bottom:1px solid var(--border);"><div>Number</div><div>Customer</div><div style="text-align:right;">Amount</div><div style="text-align:right;">Status</div></div>
+        <sc-for list="{{ recent }}" as="q" hint-placeholder-count="4">
+          <div style="display:grid; grid-template-columns:120px 1fr 120px 110px; padding:13px 18px; align-items:center; border-bottom:1px solid var(--border); font-size:13px;"><div style="font:600 12px 'JetBrains Mono'; color:var(--green);">{{ q.no }}</div><div style="font-weight:600;">{{ q.cust }}</div><div style="text-align:right; font-family:'JetBrains Mono';">{{ q.amt }}</div><div style="text-align:right;"><span style="font:600 11px Manrope; padding:3px 10px; border-radius:20px; background:{{ q.chipBg }}; color:{{ q.chipFg }};">{{ q.status }}</span></div></div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- BRANDING (logo + seal) -->
+    <sc-if value="{{ tabBranding }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:560px; background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:22px; box-shadow:var(--shadow);">
+        <div style="font:700 14px Manrope; margin-bottom:14px;">Logo &amp; Seal</div>
+        <div style="display:flex; align-items:center; gap:14px; padding:16px; border:1px dashed var(--border); border-radius:12px; background:var(--panel-2);"><img src="assets/logtech.png" style="height:40px; object-fit:contain;"><div><div style="font:600 12px Manrope; color:var(--ink);">logtech.png</div><button style="border:1px solid var(--border); background:var(--panel); color:var(--ink-2); cursor:pointer; font:600 11px Manrope; padding:6px 11px; border-radius:8px; margin-top:6px;" style-hover="border-color:var(--green); color:var(--green);">Replace logo</button></div></div>
+        <div style="font:600 11px Manrope; color:var(--ink-2); margin:16px 0 8px;">Company Seal</div>
+        <div style="display:flex; align-items:center; gap:12px; padding:14px; border:1px dashed var(--border); border-radius:12px; background:var(--panel-2);"><div style="width:46px; height:46px; border-radius:50%; border:2px solid rgba(124,24,37,0.5); display:flex; align-items:center; justify-content:center; font:800 9px Manrope; color:var(--maroon);">SEAL</div><button style="border:1px solid var(--border); background:var(--panel); color:var(--ink-2); cursor:pointer; font:600 11px Manrope; padding:6px 11px; border-radius:8px;" style-hover="border-color:var(--green); color:var(--green);">Upload seal</button></div>
+        <p style="font:500 12px Manrope; color:var(--ink-3); margin:16px 0 0;">These appear on the letterhead and footer of every quotation.</p>
+      </div>
+    </sc-if>
+
+    <!-- COMPANY INFORMATION -->
+    <sc-if value="{{ tabCompany }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:620px; background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:22px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:12px;">
+        <div style="display:flex; align-items:center; gap:9px; padding:10px 13px; background:var(--green-soft); border-radius:10px;"><span style="color:var(--green); font-size:13px;">ⓘ</span><span style="font:600 11.5px Manrope; color:var(--green);">Loaded onto every new quotation automatically. Employees can never edit these.</span></div>
+        <div><label style="font:600 11px Manrope; color:var(--ink-2); display:block; margin-bottom:5px;">Company Name</label><input value="{{ co.name }}" onInput="{{ h.coName }}" style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:10px; font:500 13px Manrope; outline:none;" style-focus="border-color:var(--green); background:var(--panel);"></div>
+        <div><label style="font:600 11px Manrope; color:var(--ink-2); display:block; margin-bottom:5px;">Address</label><textarea value="{{ co.address }}" onInput="{{ h.coAddress }}" rows="2" style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:10px; font:500 13px Manrope; outline:none; resize:vertical;" style-focus="border-color:var(--green); background:var(--panel);"></textarea></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div><label style="font:600 11px Manrope; color:var(--ink-2); display:block; margin-bottom:5px;">Phone <span style="color:var(--ink-3); font-weight:500;">(optional)</span></label><input value="{{ co.phone }}" onInput="{{ h.coPhone }}" style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:10px; font:500 13px Manrope; outline:none;" style-focus="border-color:var(--green); background:var(--panel);"></div>
+          <div><label style="font:600 11px Manrope; color:var(--ink-2); display:block; margin-bottom:5px;">Email <span style="color:var(--ink-3); font-weight:500;">(optional)</span></label><input value="{{ co.email }}" onInput="{{ h.coEmail }}" style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:10px; font:500 13px Manrope; outline:none;" style-focus="border-color:var(--green); background:var(--panel);"></div>
+          <div><label style="font:600 11px Manrope; color:var(--ink-2); display:block; margin-bottom:5px;">Website <span style="color:var(--ink-3); font-weight:500;">(optional)</span></label><input value="{{ co.website }}" onInput="{{ h.coWebsite }}" style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:10px; font:500 13px Manrope; outline:none;" style-focus="border-color:var(--green); background:var(--panel);"></div>
+          <div><label style="font:600 11px Manrope; color:var(--ink-2); display:block; margin-bottom:5px;">GST Number <span style="color:var(--ink-3); font-weight:500;">(optional)</span></label><input value="{{ co.gst }}" onInput="{{ h.coGst }}" style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:10px; font:500 13px 'JetBrains Mono'; outline:none;" style-focus="border-color:var(--green); background:var(--panel);"></div>
+        </div>
+        <button onClick="{{ saveCompany }}" style="align-self:flex-start; border:none; background:var(--green); color:#fff; cursor:pointer; font:700 13px Manrope; padding:11px 18px; border-radius:11px; margin-top:4px;" style-hover="filter:brightness(1.08);">Save company information</button>
+      </div>
+    </sc-if>
+
+    <!-- TAX SETTINGS -->
+    <sc-if value="{{ tabTax }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:560px; background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:22px; box-shadow:var(--shadow);">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+          <div><label style="font:600 12px Manrope; color:var(--ink-2); display:block; margin-bottom:7px;">CGST %</label><input value="{{ tax.cgst }}" onInput="{{ h.cgst }}" inputmode="decimal" style="width:100%; box-sizing:border-box; padding:12px 14px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:11px; font:700 18px 'JetBrains Mono'; outline:none;" style-focus="border-color:var(--green); background:var(--panel);"></div>
+          <div><label style="font:600 12px Manrope; color:var(--ink-2); display:block; margin-bottom:7px;">SGST %</label><input value="{{ tax.sgst }}" onInput="{{ h.sgst }}" inputmode="decimal" style="width:100%; box-sizing:border-box; padding:12px 14px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:11px; font:700 18px 'JetBrains Mono'; outline:none;" style-focus="border-color:var(--green); background:var(--panel);"></div>
+        </div>
+        <div style="margin-top:18px; padding:14px 16px; background:var(--green-soft); border-radius:12px; display:flex; align-items:center; justify-content:space-between;"><span style="font:600 12px Manrope; color:var(--green);">Combined GST applied</span><span style="font:700 16px 'JetBrains Mono'; color:var(--green);">{{ combinedGst }}%</span></div>
+        <p style="font:500 12px Manrope; color:var(--ink-3); margin:14px 0 0; line-height:1.5;">Table headers update everywhere automatically — e.g. <b style="color:var(--ink-2);">{{ cgstLabel }}</b>. All newly created quotations use the latest percentages.</p>
+        <button onClick="{{ saveTax }}" style="border:none; background:var(--green); color:#fff; cursor:pointer; font:700 13px Manrope; padding:11px 18px; border-radius:11px; margin-top:18px;" style-hover="filter:brightness(1.08);">Save tax settings</button>
+      </div>
+    </sc-if>
+
+    <!-- NUMBERING -->
+    <sc-if value="{{ tabNumbering }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:560px; background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:22px; box-shadow:var(--shadow);">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+          <div><label style="font:600 12px Manrope; color:var(--ink-2); display:block; margin-bottom:7px;">Prefix</label><input value="{{ num.prefix }}" onInput="{{ h.prefix }}" style="width:100%; box-sizing:border-box; padding:11px 14px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:11px; font:600 15px 'JetBrains Mono'; outline:none;" style-focus="border-color:var(--green); background:var(--panel);"></div>
+          <div><label style="font:600 12px Manrope; color:var(--ink-2); display:block; margin-bottom:7px;">Next number</label><input value="{{ num.next }}" onInput="{{ h.next }}" inputmode="numeric" style="width:100%; box-sizing:border-box; padding:11px 14px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:11px; font:600 15px 'JetBrains Mono'; outline:none;" style-focus="border-color:var(--green); background:var(--panel);"></div>
+        </div>
+        <div style="margin-top:18px; display:flex; align-items:center; gap:10px;"><span style="font:600 12px Manrope; color:var(--ink-2);">Preview:</span><span style="font:700 16px 'JetBrains Mono'; color:var(--green); background:var(--green-soft); padding:6px 14px; border-radius:10px;">{{ quoteNo }}</span><span style="color:var(--ink-3);">→</span><span style="font:600 14px 'JetBrains Mono'; color:var(--ink-3);">{{ nextNo }}</span></div>
+        <div style="margin-top:16px; display:flex; gap:18px;"><span style="font:600 12px Manrope; color:var(--ink-2); display:flex; align-items:center; gap:7px;"><span style="width:16px; height:16px; border-radius:5px; background:var(--green); color:#fff; display:flex; align-items:center; justify-content:center; font-size:10px;">✓</span>Auto-increment</span><span style="font:600 12px Manrope; color:var(--ink-2); display:flex; align-items:center; gap:7px;"><span style="width:16px; height:16px; border-radius:5px; background:var(--green); color:#fff; display:flex; align-items:center; justify-content:center; font-size:10px;">✓</span>Never duplicate</span></div>
+      </div>
+    </sc-if>
+
+    <!-- TERMS -->
+    <sc-if value="{{ tabTerms }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:680px; background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:22px; box-shadow:var(--shadow);">
+        <label style="font:600 12px Manrope; color:var(--ink-2); display:block; margin-bottom:8px;">Terms &amp; Conditions <span style="color:var(--ink-3); font-weight:500;">— one per line</span></label>
+        <textarea value="{{ termsText }}" onInput="{{ h.terms }}" rows="7" style="width:100%; box-sizing:border-box; padding:13px 15px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:12px; font:500 13px Manrope; line-height:1.6; outline:none; resize:vertical;" style-focus="border-color:var(--green); background:var(--panel);"></textarea>
+        <p style="font:500 12px Manrope; color:var(--ink-3); margin:12px 0 0;">All future quotations automatically use the latest version.</p>
+        <button onClick="{{ saveTerms }}" style="border:none; background:var(--green); color:#fff; cursor:pointer; font:700 13px Manrope; padding:11px 18px; border-radius:11px; margin-top:14px;" style-hover="filter:brightness(1.08);">Save terms</button>
+      </div>
+    </sc-if>
+
+    <!-- EMPLOYEES -->
+    <sc-if value="{{ tabEmployees }}" hint-placeholder-val="{{ false }}">
+      <div style="background:var(--panel); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); overflow:hidden; max-width:880px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 18px; border-bottom:1px solid var(--border);"><span style="font:700 14px Manrope;">Team</span><button onClick="{{ addEmployee }}" style="border:none; background:var(--green); color:#fff; cursor:pointer; font:700 12px Manrope; padding:9px 15px; border-radius:10px;" style-hover="filter:brightness(1.08);">+ Add Employee</button></div>
+        <div style="display:grid; grid-template-columns:1fr 150px 110px 90px; padding:11px 18px; font:600 10px Manrope; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.06em; border-bottom:1px solid var(--border);"><div>Name</div><div>Role</div><div>Status</div><div style="text-align:right;">Actions</div></div>
+        <sc-for list="{{ employees }}" as="e" hint-placeholder-count="4">
+          <div style="display:grid; grid-template-columns:1fr 150px 110px 90px; padding:12px 18px; align-items:center; border-bottom:1px solid var(--border);">
+            <div style="display:flex; align-items:center; gap:11px;"><span style="width:34px; height:34px; border-radius:10px; background:var(--green-soft); color:var(--green); display:flex; align-items:center; justify-content:center; font:700 13px Manrope;">{{ e.initials }}</span><div><div style="font:700 13px Manrope; color:var(--ink);">{{ e.name }}</div><div style="font:500 11px Manrope; color:var(--ink-3);">{{ e.email }}</div></div></div>
+            <div><span style="font:600 11px Manrope; padding:3px 10px; border-radius:20px; background:var(--panel-2); color:var(--ink-2);">{{ e.role }}</span></div>
+            <div><span style="display:inline-flex; align-items:center; gap:6px; font:600 12px Manrope; color:{{ e.statusFg }};"><span style="width:7px; height:7px; border-radius:50%; background:{{ e.statusFg }};"></span>{{ e.status }}</span></div>
+            <div style="text-align:right; color:var(--ink-3);">···</div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- TEMPLATES -->
+    <sc-if value="{{ tabTemplates }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:900px;">
+        <p style="font:500 13px Manrope; color:var(--ink-2); margin:0 0 16px;">Every template carries the same quotation data — only the typography and styling change. Your selection applies instantly to the live preview and the exported PDF.</p>
+        <div style="display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px;">
+          <sc-for list="{{ templateList }}" as="t" hint-placeholder-count="3">
+            <button onClick="{{ t.go }}" style="text-align:left; cursor:pointer; background:var(--panel); border:2px solid {{ t.ring }}; border-radius:16px; padding:12px; box-shadow:var(--shadow); transition:.15s;" style-hover="border-color:var(--green);">
+              <div style="background:#fff; border:1px solid #ececec; border-radius:9px; padding:13px 13px 16px; font-family:{{ t.font }};">
+                <div style="display:flex; align-items:flex-start; justify-content:space-between;">
+                  <div style="display:flex; flex-direction:column; gap:3px;"><div style="width:30px; height:6px; border-radius:2px; background:{{ t.acc }};"></div><div style="width:22px; height:3px; border-radius:2px; background:#d8d8d8;"></div><div style="width:26px; height:3px; border-radius:2px; background:#e4e4e4;"></div></div>
+                  <div style="font-size:9px; font-weight:800; letter-spacing:0.12em; color:{{ t.acc }};">QUOTATION</div>
+                </div>
+                <div style="height:2px; background:{{ t.acc }}; margin:9px 0 8px; border-radius:2px;"></div>
+                <div style="width:40%; height:3px; border-radius:2px; background:#dcdcdc; margin-bottom:9px;"></div>
+                <div style="height:9px; background:{{ t.acc }}; border-radius:3px 3px 0 0;"></div>
+                <div style="border:1px solid #ededed; border-top:none; border-radius:0 0 3px 3px;">
+                  <div style="display:flex; gap:5px; padding:5px 6px; border-bottom:1px solid #f0f0f0;"><div style="flex:1; height:3px; background:#e2e2e2; border-radius:2px;"></div><div style="width:14px; height:3px; background:#ececec; border-radius:2px;"></div><div style="width:16px; height:3px; background:{{ t.acc }}; opacity:.5; border-radius:2px;"></div></div>
+                  <div style="display:flex; gap:5px; padding:5px 6px;"><div style="flex:1; height:3px; background:#e8e8e8; border-radius:2px;"></div><div style="width:14px; height:3px; background:#efefef; border-radius:2px;"></div><div style="width:16px; height:3px; background:{{ t.acc }}; opacity:.5; border-radius:2px;"></div></div>
+                </div>
+                <div style="display:flex; justify-content:flex-end; margin-top:8px;"><div style="width:46px; height:8px; background:{{ t.accSoft }}; border-radius:3px;"></div></div>
+              </div>
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-top:12px; padding:0 2px;">
+                <div><div style="font:700 13px Manrope; color:var(--ink);">{{ t.label }}</div><div style="font:500 11px Manrope; color:var(--ink-3); margin-top:1px;">{{ t.sub }}</div></div>
+                <sc-if value="{{ t.sel }}" hint-placeholder-val="{{ false }}"><span style="font:700 10px Manrope; color:var(--green); background:var(--green-soft); padding:4px 9px; border-radius:20px;">✓ Active</span></sc-if>
+              </div>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- SETTINGS placeholder -->
+    <sc-if value="{{ tabMisc }}" hint-placeholder-val="{{ false }}">
+      <div style="background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:40px; box-shadow:var(--shadow); text-align:center; max-width:560px;">
+        <div style="font-size:30px; margin-bottom:10px;">{{ miscIcon }}</div>
+        <div style="font:700 15px Manrope; color:var(--ink);">{{ adminTitle }}</div>
+        <p style="font:500 12px Manrope; color:var(--ink-3); margin-top:6px;">Workspace preferences live here.</p>
+      </div>
+    </sc-if>
+  </main>
+</div>
+</sc-if>
+
+<!-- ============ EMPLOYEE PROFILE ============ -->
+<sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+<div style="max-width:560px; margin:40px auto; padding:0 24px;">
+  <h1 style="font:800 24px Manrope; letter-spacing:-0.02em; margin:0 0 4px;">My Profile</h1>
+  <p style="font:500 13px Manrope; color:var(--ink-2); margin:0 0 20px;">Your name appears as Sales Staff on every quotation you create.</p>
+  <div style="background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:22px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:14px;">
+    <div style="display:flex; align-items:center; gap:14px;"><span style="width:56px; height:56px; border-radius:16px; background:var(--green-soft); color:var(--green); display:flex; align-items:center; justify-content:center; font:800 20px Manrope;">{{ empInitials }}</span><button style="border:1px solid var(--border); background:var(--panel); color:var(--ink-2); cursor:pointer; font:600 12px Manrope; padding:8px 14px; border-radius:10px;">Change photo</button></div>
+    <div><label style="font:600 11px Manrope; color:var(--ink-2); display:block; margin-bottom:5px;">Name</label><input value="{{ emp.name }}" onInput="{{ h.empName }}" style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:10px; font:500 13px Manrope; outline:none;" style-focus="border-color:var(--green); background:var(--panel);"></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div><label style="font:600 11px Manrope; color:var(--ink-2); display:block; margin-bottom:5px;">Email</label><input value="{{ emp.email }}" onInput="{{ h.empEmail }}" style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:10px; font:500 13px Manrope; outline:none;" style-focus="border-color:var(--green); background:var(--panel);"></div>
+      <div><label style="font:600 11px Manrope; color:var(--ink-2); display:block; margin-bottom:5px;">Phone</label><input value="{{ emp.phone }}" onInput="{{ h.empPhone }}" style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:10px; font:500 13px Manrope; outline:none;" style-focus="border-color:var(--green); background:var(--panel);"></div>
+    </div>
+    <button onClick="{{ saveProfile }}" style="border:none; background:var(--green); color:#fff; cursor:pointer; font:700 13px Manrope; padding:11px; border-radius:11px; margin-top:4px;" style-hover="filter:brightness(1.08);">Save profile</button>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ LOGIN (employee + admin share layout) ============ -->
+<sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:100vh; display:grid; grid-template-columns:1fr 1fr;">
+  <div style="display:flex; align-items:center; justify-content:center; padding:24px;">
+    <div style="width:100%; max-width:360px;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:28px;"><div style="width:32px; height:32px; border-radius:9px; background:var(--green); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:17px;">Q</div><div style="font-weight:800; font-size:18px;">Quotely</div></div>
+      <h1 style="font:800 26px Manrope; letter-spacing:-0.02em; margin:0 0 4px;">{{ loginTitle }}</h1>
+      <p style="font:500 13px Manrope; color:var(--ink-2); margin:0 0 24px;">{{ loginSub }}</p>
+      <label style="font:600 11px Manrope; color:var(--ink-2); display:block; margin-bottom:6px;">Email</label>
+      <input value="{{ loginEmailVal }}" onInput="{{ h.loginEmail }}" placeholder="you@logtech.in" style="width:100%; box-sizing:border-box; padding:12px 14px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:11px; font:500 14px Manrope; outline:none; margin-bottom:14px;" style-focus="border-color:var(--green); background:var(--panel);">
+      <label style="font:600 11px Manrope; color:var(--ink-2); display:block; margin-bottom:6px;">Password</label>
+      <input type="password" value="{{ loginPassVal }}" onInput="{{ h.loginPass }}" placeholder="••••••••" style="width:100%; box-sizing:border-box; padding:12px 14px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:11px; font:500 14px Manrope; outline:none; margin-bottom:18px;" style-focus="border-color:var(--green); background:var(--panel);">
+      <button onClick="{{ doLogin }}" style="width:100%; border:none; background:var(--green); color:#fff; cursor:pointer; font:700 14px Manrope; padding:13px; border-radius:11px;" style-hover="filter:brightness(1.08);">{{ loginCta }}</button>
+      <button onClick="{{ switchLogin }}" style="width:100%; border:none; background:transparent; color:var(--ink-2); cursor:pointer; font:600 12px Manrope; padding:14px; margin-top:6px;">{{ loginSwitch }}</button>
+    </div>
+  </div>
+  <div style="background:var(--green); display:flex; flex-direction:column; justify-content:center; padding:48px; color:#eaf3ec;">
+    <div style="font:800 30px Manrope; line-height:1.2; letter-spacing:-0.02em; color:#fff; max-width:380px;">Professional quotations in under two minutes.</div>
+    <p style="font:500 14px Manrope; color:rgba(255,255,255,0.78); margin-top:14px; max-width:360px; line-height:1.6;">Smart GST auto-calculation, pixel-perfect PDF output, and a live preview that matches your final document exactly.</p>
+    <div style="display:flex; gap:10px; margin-top:28px;"><span style="font:600 12px Manrope; background:rgba(255,255,255,0.14); padding:7px 13px; border-radius:20px;">Auto tax</span><span style="font:600 12px Manrope; background:rgba(255,255,255,0.14); padding:7px 13px; border-radius:20px;">Live preview</span><span style="font:600 12px Manrope; background:rgba(255,255,255,0.14); padding:7px 13px; border-radius:20px;">PDF export</span></div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ PDF PREVIEW OVERLAY ============ -->
+<sc-if value="{{ pdfOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closePdf }}" style="position:fixed; inset:0; z-index:60; background:rgba(12,16,14,0.62); display:flex; flex-direction:column; align-items:center; padding:28px; overflow:auto; animation:fadeIn .14s; backdrop-filter:blur(3px);">
+  <div style="display:flex; align-items:center; gap:10px; margin-bottom:18px;">
+    <span style="font:700 13px Manrope; color:#fff;">PDF Preview · {{ quoteNo }}</span>
+    <button onClick="{{ downloadPdf }}" style="border:none; background:#fff; color:var(--green); cursor:pointer; font:700 12px Manrope; padding:8px 14px; border-radius:9px;">↓ Download</button>
+    <button onClick="{{ doPrint }}" style="border:1px solid rgba(255,255,255,0.4); background:transparent; color:#fff; cursor:pointer; font:700 12px Manrope; padding:8px 14px; border-radius:9px;">⎙ Print</button>
+    <button onClick="{{ closePdf }}" style="border:1px solid rgba(255,255,255,0.4); background:transparent; color:#fff; cursor:pointer; font:700 12px Manrope; padding:8px 14px; border-radius:9px;">✕ Close</button>
+  </div>
+  <div class="print-sheet" ref="{{ pdfWrapRef }}" onClick="{{ stop }}" style="position:relative; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,0.4); border-radius:3px;">
+    <div ref="{{ pdfInnerRef }}" style="width:794px; background:#fff;">
+      <dc-import name="QuoteSheet" data="{{ sheetData }}" hint-size="794px,1123px"></dc-import>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ SUCCESS OVERLAY ============ -->
+<sc-if value="{{ successOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeSuccess }}" style="position:fixed; inset:0; z-index:70; background:rgba(12,16,14,0.55); display:flex; align-items:center; justify-content:center; animation:fadeIn .14s; backdrop-filter:blur(3px);">
+  <div onClick="{{ stop }}" style="width:380px; background:var(--panel); border-radius:20px; padding:32px; text-align:center; box-shadow:0 30px 80px rgba(0,0,0,0.3);">
+    <div style="width:64px; height:64px; border-radius:50%; background:var(--green-soft); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; animation:pop .4s;"><span style="color:var(--green); font-size:30px;">✓</span></div>
+    <div style="font:800 19px Manrope; color:var(--ink);">Quotation Generated</div>
+    <p style="font:500 13px Manrope; color:var(--ink-2); margin:6px 0 2px;">{{ successNo }} has been created and saved.</p>
+    <p style="font:600 13px 'JetBrains Mono'; color:var(--green); margin:0 0 20px;">{{ grandTotal }}</p>
+    <div style="display:flex; gap:10px;">
+      <button onClick="{{ closeSuccess }}" style="flex:1; border:1px solid var(--border); background:var(--panel); color:var(--ink); cursor:pointer; font:700 13px Manrope; padding:11px; border-radius:11px;">Close</button>
+      <button onClick="{{ newQuote }}" style="flex:1; border:none; background:var(--green); color:#fff; cursor:pointer; font:700 13px Manrope; padding:11px; border-radius:11px;">New Quotation</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ ADD EMPLOYEE MODAL ============ -->
+<sc-if value="{{ emModalOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ emClose }}" style="position:fixed; inset:0; z-index:75; background:rgba(12,16,14,0.55); display:flex; align-items:center; justify-content:center; animation:fadeIn .14s; backdrop-filter:blur(3px); padding:20px;">
+  <div onClick="{{ stop }}" style="width:420px; max-width:100%; background:var(--panel); border-radius:18px; padding:24px; box-shadow:0 30px 80px rgba(0,0,0,0.3);">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+      <div style="font:800 17px Manrope; color:var(--ink);">Add Employee</div>
+      <button onClick="{{ emClose }}" style="width:30px; height:30px; border:none; background:var(--panel-2); color:var(--ink-2); cursor:pointer; border-radius:9px; font-size:14px;" style-hover="color:var(--maroon);">✕</button>
+    </div>
+    <p style="font:500 12px Manrope; color:var(--ink-2); margin:0 0 18px;">They'll be invited by email with a temporary password to share.</p>
+
+    <label style="font:600 11px Manrope; color:var(--ink-2); display:block; margin-bottom:6px;">Employee Name <span style="color:var(--green); font-weight:700;">*</span></label>
+    <input value="{{ em.name }}" onInput="{{ h.emName }}" placeholder="e.g. Priya Verma" style="width:100%; box-sizing:border-box; padding:11px 13px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:10px; font:500 13px Manrope; outline:none; margin-bottom:13px;" style-focus="border-color:var(--green); background:var(--panel);">
+
+    <label style="font:600 11px Manrope; color:var(--ink-2); display:block; margin-bottom:6px;">Email ID <span style="color:var(--green); font-weight:700;">*</span></label>
+    <input value="{{ em.email }}" onInput="{{ h.emEmail }}" placeholder="priya@logtech.in" style="width:100%; box-sizing:border-box; padding:11px 13px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:10px; font:500 13px Manrope; outline:none; margin-bottom:13px;" style-focus="border-color:var(--green); background:var(--panel);">
+
+    <label style="font:600 11px Manrope; color:var(--ink-2); display:block; margin-bottom:6px;">Temporary Password</label>
+    <div style="display:flex; gap:8px;">
+      <input value="{{ em.pass }}" onInput="{{ h.emPass }}" style="flex:1; min-width:0; box-sizing:border-box; padding:11px 13px; border:1px solid var(--border); background:var(--field); color:var(--ink); border-radius:10px; font:600 14px 'JetBrains Mono'; letter-spacing:0.04em; outline:none;" style-focus="border-color:var(--green); background:var(--panel);">
+      <button onClick="{{ emGenPass }}" title="Generate" style="flex-shrink:0; border:1px solid var(--border); background:var(--panel); color:var(--ink-2); cursor:pointer; font:600 12px Manrope; padding:0 14px; border-radius:10px;" style-hover="border-color:var(--green); color:var(--green);">↻ New</button>
+    </div>
+    <p style="font:500 11px Manrope; color:var(--ink-3); margin:8px 0 0; line-height:1.5;">Share this securely. The employee can change it after their first sign-in. Admins can reset but never view existing passwords.</p>
+
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button onClick="{{ emClose }}" style="flex:1; border:1px solid var(--border); background:var(--panel); color:var(--ink); cursor:pointer; font:700 13px Manrope; padding:11px; border-radius:11px;">Cancel</button>
+      <button onClick="{{ emSubmit }}" style="flex:1.6; border:none; background:var(--green); color:#fff; cursor:pointer; font:700 13px Manrope; padding:11px; border-radius:11px;" style-hover="filter:brightness(1.08);">Add &amp; send invite</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ TOAST ============ -->
+<sc-if value="{{ toastShown }}" hint-placeholder-val="{{ false }}">
+<div style="position:fixed; bottom:24px; left:50%; z-index:80; transform:translateX(-50%); display:flex; align-items:center; gap:11px; background:var(--ink); color:#fff; padding:13px 18px; border-radius:13px; box-shadow:0 12px 32px rgba(0,0,0,0.25); animation:toastIn .22s ease;">
+  <span style="width:22px; height:22px; border-radius:50%; background:var(--green); display:flex; align-items:center; justify-content:center; font-size:12px;">✓</span>
+  <span style="font:600 13px Manrope;">{{ toastMsg }}</span>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;}}">
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    this.rootRef = React.createRef();
+    this.previewOuterRef = React.createRef();
+    this.sheetWrapRef = React.createRef();
+    this.sheetInnerRef = React.createRef();
+    this.pdfWrapRef = React.createRef();
+    this.pdfInnerRef = React.createRef();
+    this.state = {
+      view:'create', adminTab:'overview', dark:false,
+      menuOpen:false, profileOpen:false, pdfOpen:false, successOpen:false,
+      successNo:'', toast:null, manualGst:false, showAmount:true, template:'emerald',
+      empModal:{ open:false, name:'', email:'', pass:'' },
+      custOpen:true, loginMode:'employee', loginEmail:'', loginPass:'',
+      emp:{ loggedIn:true, name:'Aarav Sharma', role:'Manager', email:'aarav@logtech.in', phone:'+91 98860 22113' },
+      co:{ logoSrc:'assets/logtech.png', name:'LogTech Systems', address:'No. 42, Electronics City Phase 1\nBengaluru, Karnataka 560100', phone:'+91 80 4123 7700', email:'sales@logtech.in', website:'www.logtech.in', gst:'29AALCS1234M1ZP', sealName:'LOGTECH' },
+      tax:{ cgst:9, sgst:9 },
+      num:{ prefix:'QT-', next:7, pad:6 },
+      terms:'This quotation is valid for 30 days from the date of issue.\nPrices are inclusive of GST as indicated above.\nDelivery within 4–6 weeks from a confirmed purchase order.\nPayment terms: 50% advance, balance on delivery.',
+      cust:{ name:'Rohan Mehta', company:'Apex Manufacturing Pvt Ltd', address:'Plot 14, MIDC Industrial Area\nPune, Maharashtra 411019', phone:'+91 98220 11234', email:'rohan@apexmfg.in', gst:'27ABCDE1234F1Z5' },
+      items:[
+        { id:1, name:'Industrial IoT Gateway — Model LT-220', qty:2, total:118000 },
+        { id:2, name:'On-site Installation & Commissioning', qty:1, total:35400 },
+        { id:3, name:'Annual Maintenance Contract (1 Year)', qty:1, total:23600 },
+      ],
+      employees:[
+        { name:'Aarav Sharma', email:'aarav@logtech.in', role:'Manager', active:true },
+        { name:'Diya Nair', email:'diya@logtech.in', role:'Employee', active:true },
+        { name:'Karan Patel', email:'karan@logtech.in', role:'Employee', active:false },
+        { name:'Meera Iyer', email:'meera@logtech.in', role:'Admin', active:true },
+      ],
+      _uid:4,
+    };
+  }
+  componentDidMount(){ this.applyTheme(); this.scheduleFit(); this._r=()=>this.fit(); window.addEventListener('resize',this._r); }
+  componentWillUnmount(){ window.removeEventListener('resize',this._r); }
+  componentDidUpdate(){ this.applyTheme(); this.scheduleFit(); if(this.state.pdfOpen){ this.fitPdf(); clearTimeout(this._pf); this._pf=setTimeout(()=>this.fitPdf(),90); } }
+  fitPdf(){
+    const w=this.pdfWrapRef.current, i=this.pdfInnerRef.current;
+    if(!w||!i) return;
+    const availW=Math.min(window.innerWidth-56, 920), availH=window.innerHeight-128;
+    const sheetH=i.offsetHeight||1123;
+    let sc=Math.min(availW/794, availH/sheetH);
+    if(!isFinite(sc)||sc<=0) sc=0.7; sc=Math.min(sc,1.15);
+    i.style.transform='scale('+sc+')'; i.style.transformOrigin='top left';
+    w.style.width=(794*sc)+'px'; w.style.height=(sheetH*sc)+'px';
+  }
+
+  applyTheme(){
+    const el=this.rootRef.current; if(!el) return;
+    const dark={ '--bg':'#0b0f0d','--panel':'#13191600','--panel-x':'#131916','--border':'#222b25','--ink':'#eaf0ec','--ink-2':'#9aa79f','--ink-3':'#5f6b63','--field':'#1a221d','--green':'#3f9d6a','--green-2':'#4fb87e','--green-soft':'#16241b','--maroon':'#c76b75' };
+    const light={ '--bg':'#eef2ee','--panel':'#ffffff','--panel-x':'#ffffff','--border':'#e6eae6','--ink':'#16201b','--ink-2':'#5c685f','--ink-3':'#9aa39c','--field':'#f4f7f4','--green':'#22673a','--green-2':'#2f8f57','--green-soft':'#eef4ef','--maroon':'#7c1825' };
+    const t=this.state.dark?dark:light;
+    for(const k in t){ if(k==='--panel-x') continue; el.style.setProperty(k, k==='--panel'? (this.state.dark?'#131916':'#ffffff') : t[k]); }
+    el.style.setProperty('--shadow', this.state.dark?'0 1px 2px rgba(0,0,0,0.3),0 8px 24px rgba(0,0,0,0.4)':'0 1px 2px rgba(20,40,28,0.04),0 8px 24px rgba(20,40,28,0.06)');
+  }
+  fit(){
+    const o=this.previewOuterRef.current, w=this.sheetWrapRef.current, i=this.sheetInnerRef.current;
+    if(!o||!w||!i) return;
+    const availW=o.clientWidth-36, availH=o.clientHeight-36;
+    const sheetH=i.offsetHeight||1123;
+    let sc=Math.min(availW/794, availH/sheetH);
+    if(!isFinite(sc)||sc<=0) sc=0.5;
+    sc=Math.min(sc, 1.05);
+    i.style.transform='scale('+sc+')'; i.style.transformOrigin='top left';
+    w.style.width=(794*sc)+'px'; w.style.height=(sheetH*sc)+'px';
+  }
+  scheduleFit(){ this.fit(); clearTimeout(this._ft); this._ft=setTimeout(()=>this.fit(),80); }
+
+  set(section,key){ return (e)=>{ const v=e.target.value; this.setState(s=>({ [section]:{...s[section],[key]:v} })); }; }
+  toast(msg){ this.setState({toast:msg}); clearTimeout(this._t); this._t=setTimeout(()=>this.setState({toast:null}),2400); }
+
+  // ---- GST math ----
+  calc(item){
+    const tax=this.state.tax;
+    const qty=Math.max(1, parseFloat(item.qty)||0) || 1;
+    if(this.state.manualGst){
+      const rate=parseFloat(item.rate)||0;
+      const cgst=parseFloat(item.cgst)||0, sgst=parseFloat(item.sgst)||0;
+      const base=rate*qty; const total=base+cgst+sgst;
+      return { base, rate, cgst, sgst, total };
+    }
+    const total=parseFloat(item.total)||0;
+    const tpc=(parseFloat(tax.cgst)||0)+(parseFloat(tax.sgst)||0);
+    const base=total/(1+tpc/100);
+    const cgst=base*(parseFloat(tax.cgst)||0)/100;
+    const sgst=base*(parseFloat(tax.sgst)||0)/100;
+    const rate=base/qty;
+    return { base, rate, cgst, sgst, total };
+  }
+  money(n){ if(!isFinite(n)) n=0; return '₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:2}); }
+  words(n){
+    n=Math.floor(Math.abs(n));
+    const a=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+    const b=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+    const two=x=> x<20? a[x] : (b[Math.floor(x/10)]+(x%10?' '+a[x%10]:''));
+    const three=x=>{ const h=Math.floor(x/100), r=x%100; return (h?a[h]+' Hundred'+(r?' ':''):'')+(r?two(r):''); };
+    if(n===0) return 'Zero';
+    let s='';
+    const cr=Math.floor(n/10000000); n%=10000000;
+    const la=Math.floor(n/100000); n%=100000;
+    const th=Math.floor(n/1000); n%=1000;
+    if(cr) s+=three(cr)+' Crore ';
+    if(la) s+=three(la)+' Lakh ';
+    if(th) s+=three(th)+' Thousand ';
+    if(n) s+=three(n);
+    return s.trim();
+  }
+  quoteNumber(next){ const p=this.state.num.prefix; const pad=this.state.num.pad; return p+String(parseInt(next)||0).padStart(pad,'0'); }
+
+  renderVals(){
+    const S=this.state;
+    const view=S.view;
+    const isCreate=view==='create', isAdmin=view==='admin', isProfile=view==='profile';
+    const isLogin=view==='login';
+    const showShell=isCreate||isAdmin||isProfile;
+    const cgstP=parseFloat(S.tax.cgst)||0, sgstP=parseFloat(S.tax.sgst)||0;
+    const cgstLabel='CGST ('+S.tax.cgst+'%)', sgstLabel='SGST ('+S.tax.sgst+'%)';
+    const gridCols = S.showAmount ? '30px minmax(0,1fr) 44px 88px 80px 80px 92px' : '30px minmax(0,1fr) 60px 130px 110px 110px';
+    const TEMPLATES={
+      emerald:{ id:'emerald', label:'Emerald', sub:'Manrope · forest green', font:"'Manrope',sans-serif", mono:"'JetBrains Mono',monospace", acc:'#22673a', accSoft:'#eef4ef', theadFg:'#eaf3ec' },
+      helvetica:{ id:'helvetica', label:'Helvetica', sub:'Helvetica LT Pro · charcoal', font:"'Helvetica LT Pro','Helvetica Neue',Helvetica,Arial,sans-serif", mono:"'Helvetica LT Pro','Helvetica Neue',Helvetica,Arial,sans-serif", acc:'#1f2937', accSoft:'#eef0f2', theadFg:'#f3f5f7' },
+      classic:{ id:'classic', label:'Classic', sub:'Georgia serif · burgundy', font:"Georgia,'Times New Roman',serif", mono:"'JetBrains Mono',monospace", acc:'#7c1825', accSoft:'#f6edef', theadFg:'#f4e7ea' },
+    };
+    const tpl=TEMPLATES[S.template]||TEMPLATES.emerald;
+    const templateList=Object.values(TEMPLATES).map(t=>({ ...t, active:S.template===t.id, sel:S.template===t.id, ring:S.template===t.id?'var(--green)':'var(--border)', go:()=>{ this.setState({template:t.id}); this.toast(t.label+' template applied'); } }));
+
+    // computed items
+    let subBase=0,cgstT=0,sgstT=0,grand=0;
+    const rows=S.items.map((it,i)=>{
+      const c=this.calc(it);
+      subBase+=c.base; cgstT+=c.cgst; sgstT+=c.sgst; grand+=c.total;
+      return {
+        id:it.id, idx:i+1, name:it.name, qty:it.qty, total:it.total,
+        rate:this.money(c.rate), cgst:this.money(c.cgst), sgst:this.money(c.sgst),
+        rateRaw:it.rate!==undefined?it.rate:Math.round(c.rate), cgstRaw:it.cgst!==undefined?it.cgst:Math.round(c.cgst), sgstRaw:it.sgst!==undefined?it.sgst:Math.round(c.sgst),
+        auto:!S.manualGst, manual:S.manualGst,
+        onName:this.set('_itemName_'+it.id), onQty:this.itemSet(it.id,'qty'), onTotal:this.itemSet(it.id,'total'),
+        onRate:this.itemSet(it.id,'rate'), onCgst:this.itemSet(it.id,'cgst'), onSgst:this.itemSet(it.id,'sgst'),
+        onDel:()=>this.delItem(it.id), onDup:()=>this.dupItem(it.id),
+      };
+    });
+    // fix name handler (need proper)
+    rows.forEach(r=>{ r.onName=this.itemSet(r.id,'name'); });
+
+    const grandWordsStr='Rupees '+this.words(grand)+' Only';
+    const quoteNo=this.quoteNumber(S.num.next);
+
+    // sheet data
+    const co=S.co;
+    const sheetData={
+      company:{ logoSrc:co.logoSrc, name:co.name, address:co.address, sealName:co.sealName,
+        phone:co.phone, email:co.email, website:co.website, gst:co.gst,
+        hasPhone:!!co.phone, hasEmail:!!co.email, hasWebsite:!!co.website, hasGst:!!co.gst },
+      quoteNo, date:this.todayStr(), salesStaff:S.emp.loggedIn?S.emp.name:'Not Assigned',
+      customer:{ name:S.cust.name||'—', company:S.cust.company, address:S.cust.address, phone:S.cust.phone, email:S.cust.email, gst:S.cust.gst,
+        hasCompany:!!S.cust.company, hasPhone:!!S.cust.phone, hasEmail:!!S.cust.email, hasGst:!!S.cust.gst },
+      items:rows.map(r=>({ idx:r.idx, name:r.name||'Item', qty:r.qty, rate:r.rate, cgst:r.cgst, sgst:r.sgst, total:this.money(this.calc(S.items[r.idx-1]).total) })),
+      hasItems:rows.length>0, noItems:rows.length===0,
+      showAmount:S.showAmount, gridCols, tpl,
+      cgstLabel, sgstLabel,
+      subtotal:this.money(subBase), cgstTotal:this.money(cgstT), sgstTotal:this.money(sgstT), grandTotal:this.money(grand),
+      grandWords:grandWordsStr,
+      terms:S.terms.split('\n').filter(x=>x.trim()).map(t=>({text:t})),
+    };
+
+    // screen links
+    const go=(v,tab)=>()=>this.setState({view:v, adminTab:tab||'overview', menuOpen:false, profileOpen:false});
+    const screenLinks=[
+      {label:'Create Quotation', icon:'✎', go:go('create')},
+      {label:'Dashboard', icon:'▤', go:go('admin','overview')},
+      {label:'Company Branding', icon:'◑', go:go('admin','branding')},
+      {label:'Employee Management', icon:'◍', go:go('admin','employees')},
+      {label:'Tax Settings', icon:'%', go:go('admin','tax')},
+      {label:'Quotation Numbering', icon:'#', go:go('admin','numbering')},
+      {label:'Terms & Conditions', icon:'¶', go:go('admin','terms')},
+      {label:'PDF Preview', icon:'⎙', go:()=>this.setState({pdfOpen:true,menuOpen:false,view:'create'})},
+      {label:'Employee Login', icon:'◐', go:()=>this.setState({view:'login',loginMode:'employee',menuOpen:false,loginEmail:'',loginPass:''})},
+      {label:'Admin Login', icon:'⚿', go:()=>this.setState({view:'login',loginMode:'admin',menuOpen:false,loginEmail:'',loginPass:''})},
+      {label:S.dark?'Light Mode':'Dark Mode', icon:S.dark?'☀':'☾', go:()=>{ this.setState(s=>({dark:!s.dark,menuOpen:false})); }},
+    ];
+
+    // admin nav
+    const navItems=[
+      ['overview','Dashboard','▤'],['branding','Branding','◑'],['company','Company Info','🏢'],
+      ['employees','Employees','◍'],['tax','Tax Settings','%'],['numbering','Numbering','#'],
+      ['terms','Terms','¶'],['templates','Templates','▦'],['settings','Settings','⚙'],
+    ];
+    const adminNav=navItems.map(([id,label,icon])=>{
+      const sel=S.adminTab===id;
+      return { label, icon, bg: sel?'var(--green-soft)':'transparent', fg: sel?'var(--green)':'var(--ink-2)', go:()=>this.setState({adminTab:id}) };
+    });
+    const tab=S.adminTab;
+    const titles={ overview:['Dashboard','Overview of quotation activity'], branding:['Company Branding','Logo and seal — applied to all new quotations'], company:['Company Information','Details printed on every quotation — employees can never edit these'], employees:['Employee Management','Create, edit and manage your team'], tax:['Tax Settings','GST percentages applied to every new quotation'], numbering:['Quotation Numbering','Control prefix and sequence'], terms:['Terms & Conditions','Default terms printed on every quotation'], templates:['Quotation Templates','Pick the look of your quotation — same data, different design'], settings:['Settings','Workspace preferences'] };
+    const [adminTitle,adminSub]=titles[tab]||titles.overview;
+
+    const stats=[
+      {label:'Quotations · June', value:'48', delta:'▲ 12% vs May'},
+      {label:'Value Quoted', value:'₹62.4L', delta:'▲ 8% vs May'},
+      {label:'Active Employees', value:String(S.employees.filter(e=>e.active).length), delta:'of '+S.employees.length+' total'},
+    ];
+    const recent=[
+      {no:'QT-000006', cust:'Apex Manufacturing', amt:'₹1,77,000', status:'Accepted', chipBg:'var(--green-soft)', chipFg:'var(--green)'},
+      {no:'QT-000005', cust:'Vertex Robotics', amt:'₹94,400', status:'Sent', chipBg:'var(--panel-2)', chipFg:'var(--ink-2)'},
+      {no:'QT-000004', cust:'Nordic Controls', amt:'₹2,36,000', status:'Accepted', chipBg:'var(--green-soft)', chipFg:'var(--green)'},
+      {no:'QT-000003', cust:'Pioneer Energy', amt:'₹41,300', status:'Draft', chipBg:'rgba(124,24,37,0.08)', chipFg:'var(--maroon)'},
+    ];
+    const employees=S.employees.map(e=>({ name:e.name, email:e.email, role:e.role, initials:e.name.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase(), status:e.active?'Active':'Disabled', statusFg:e.active?'var(--green-2)':'var(--ink-3)' }));
+
+    const h={
+      custName:this.set('cust','name'), custCompany:this.set('cust','company'), custPhone:this.set('cust','phone'),
+      custAddress:this.set('cust','address'), custEmail:this.set('cust','email'), custGst:this.set('cust','gst'),
+      coName:this.set('co','name'), coAddress:this.set('co','address'), coPhone:this.set('co','phone'),
+      coEmail:this.set('co','email'), coWebsite:this.set('co','website'), coGst:this.set('co','gst'),
+      cgst:this.set('tax','cgst'), sgst:this.set('tax','sgst'),
+      prefix:this.set('num','prefix'), next:this.set('num','next'),
+      terms:(e)=>this.setState({terms:e.target.value}),
+      empName:this.set('emp','name'), empEmail:this.set('emp','email'), empPhone:this.set('emp','phone'),
+      loginEmail:(e)=>this.setState({loginEmail:e.target.value}), loginPass:(e)=>this.setState({loginPass:e.target.value}),
+      emName:(e)=>this.setState(s=>({empModal:{...s.empModal,name:e.target.value}})),
+      emEmail:(e)=>this.setState(s=>({empModal:{...s.empModal,email:e.target.value}})),
+      emPass:(e)=>this.setState(s=>({empModal:{...s.empModal,pass:e.target.value}})),
+    };
+
+    return {
+      // shell
+      showShell, isCreate, isAdmin, isProfile, isLogin,
+      goCreate:go('create'), goDash:go('admin','overview'), goProfile:go('profile'),
+      createPillBg:isCreate?'var(--green-soft)':'transparent', createPillFg:isCreate?'var(--green)':'var(--ink-2)',
+      dashPillBg:isAdmin?'var(--green-soft)':'transparent', dashPillFg:isAdmin?'var(--green)':'var(--ink-2)',
+      toggleMenu:()=>this.setState(s=>({menuOpen:!s.menuOpen,profileOpen:false})),
+      toggleProfile:()=>this.setState(s=>({profileOpen:!s.profileOpen,menuOpen:false})),
+      toggleDark:()=>this.setState(s=>({dark:!s.dark})), themeIcon:S.dark?'☀':'☾',
+      menuOpen:S.menuOpen, profileOpen:S.profileOpen, screenLinks,
+      loggedIn:S.emp.loggedIn, loggedOut:!S.emp.loggedIn,
+      empInitials:S.emp.name.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase(),
+      empName:S.emp.name, empRole:S.emp.role, emp:S.emp,
+      logout:()=>this.setState(s=>({emp:{...s.emp,loggedIn:false},profileOpen:false})),
+      goAdminLogin:()=>this.setState({view:'login',loginMode:'admin',loginEmail:'',loginPass:''}),
+      rootRef:this.rootRef,
+
+      // create
+      quoteNo, today:this.todayStr(), salesStaff:S.emp.loggedIn?S.emp.name:'Not Assigned',
+      custOpen:S.custOpen, custChevron:S.custOpen?'0deg':'-90deg',
+      toggleCustomer:()=>this.setState(s=>({custOpen:!s.custOpen})),
+      cust:S.cust, h,
+      rows, hasRows:rows.length>0, noRows:rows.length===0, itemCount:rows.length+(rows.length===1?' item':' items'),
+      addItem:()=>this.addItem(), clearItems:()=>this.setState({items:[]}),
+      manualTrackBg:S.manualGst?'var(--green)':'var(--border)', manualKnobX:S.manualGst?'18px':'2px',
+      toggleManual:()=>this.setState(s=>{ const items=s.items.map(it=>{ if(!s.manualGst){ const c=this.calc({...it}); return {...it, rate:it.rate!==undefined?it.rate:Math.round(c.rate), cgst:it.cgst!==undefined?it.cgst:Math.round(c.cgst), sgst:it.sgst!==undefined?it.sgst:Math.round(c.sgst)}; } return it; }); return {manualGst:!s.manualGst, items}; }),
+      gstMode:S.manualGst?'Manual':'Auto GST',
+      toggleAmount:()=>this.setState(s=>({showAmount:!s.showAmount})),
+      amountTrackBg:S.showAmount?'var(--green)':'var(--border)', amountKnobX:S.showAmount?'17px':'2px',
+      cgstLabel, sgstLabel,
+      subtotal:this.money(subBase), cgstTotal:this.money(cgstT), sgstTotal:this.money(sgstT), grandTotal:this.money(grand), grandWords:grandWordsStr,
+      sheetData,
+      previewOuterRef:this.previewOuterRef, sheetWrapRef:this.sheetWrapRef, sheetInnerRef:this.sheetInnerRef,
+      pdfWrapRef:this.pdfWrapRef, pdfInnerRef:this.pdfInnerRef,
+      openPdf:()=>this.setState({pdfOpen:true}), closePdf:()=>this.setState({pdfOpen:false}), pdfOpen:S.pdfOpen, stop:(e)=>e.stopPropagation(),
+      doPrint:()=>{ this.setState({pdfOpen:true}); setTimeout(()=>window.print(),200); },
+      downloadPdf:()=>{ this.toast('PDF downloaded'); setTimeout(()=>window.print(),250); },
+      generate:()=>this.setState(s=>({successOpen:true, successNo:this.quoteNumber(s.num.next)})),
+
+      // admin
+      adminNav, adminTitle, adminSub,
+      tabOverview:tab==='overview', tabBranding:tab==='branding', tabTax:tab==='tax', tabCompany:tab==='company',
+      tabNumbering:tab==='numbering', tabTerms:tab==='terms', tabEmployees:tab==='employees',
+      tabTemplates:tab==='templates', tabMisc:(tab==='settings'),
+      miscIcon:'⚙',
+      stats, recent, employees, templateList,
+      co:S.co, tax:S.tax, num:S.num, termsText:S.terms,
+      combinedGst:(cgstP+sgstP), nextNo:this.quoteNumber((parseInt(S.num.next)||0)+1),
+      saveBranding:()=>this.toast('Company information updated'),
+      saveCompany:()=>this.toast('Company information updated'),
+      saveTax:()=>this.toast('Tax settings saved'),
+      saveTerms:()=>this.toast('Terms updated'),
+      saveProfile:()=>{ this.toast('Profile saved'); this.setState({view:'create'}); },
+      addEmployee:()=>this.setState({ empModal:{ open:true, name:'', email:'', pass:this.genPass() } }),
+      em:S.empModal,
+      emGenPass:()=>this.setState(s=>({ empModal:{...s.empModal, pass:this.genPass()} })),
+      emClose:()=>this.setState(s=>({ empModal:{...s.empModal, open:false} })),
+      emModalOpen:S.empModal.open,
+      emCanSubmit:!!(S.empModal.name&&S.empModal.email),
+      emSubmit:()=>{ const m=S.empModal; if(!m.name||!m.email){ this.toast('Name and email required'); return; } this.setState(s=>({ employees:[...s.employees,{name:m.name,email:m.email,role:'Employee',active:true}], empModal:{open:false,name:'',email:'',pass:''} })); this.toast('Employee added · invite sent'); },
+
+      // profile
+      // (emp + h already exposed)
+
+      // login
+      loginTitle:S.loginMode==='admin'?'Admin sign in':'Employee sign in',
+      loginSub:S.loginMode==='admin'?'Manage company settings, employees and tax.':'Sign in to start creating quotations.',
+      loginCta:S.loginMode==='admin'?'Sign in as Admin':'Sign in',
+      loginSwitch:S.loginMode==='admin'?'Sign in as Employee instead':'Sign in as Admin instead',
+      loginEmailVal:S.loginEmail, loginPassVal:S.loginPass,
+      switchLogin:()=>this.setState(s=>({loginMode:s.loginMode==='admin'?'employee':'admin'})),
+      doLogin:()=>{
+        if(S.loginMode==='admin'){ this.setState({view:'admin',adminTab:'overview'}); this.toast('Welcome back, Admin'); }
+        else { const nm=S.loginEmail?S.loginEmail.split('@')[0].replace(/\./g,' ').replace(/\b\w/g,c=>c.toUpperCase()):'Aarav Sharma'; this.setState(s=>({view:'create',emp:{...s.emp,loggedIn:true,name:nm}})); this.toast('Signed in'); }
+      },
+
+      // overlays
+      successOpen:S.successOpen, successNo:S.successNo,
+      closeSuccess:()=>this.setState({successOpen:false}),
+      newQuote:()=>this.setState(s=>({ successOpen:false, num:{...s.num,next:(parseInt(s.num.next)||0)+1}, items:[], cust:{name:'',company:'',address:'',phone:'',email:'',gst:''} })),
+
+      // toast
+      toastShown:!!S.toast, toastMsg:S.toast,
+    };
+  }
+
+  todayStr(){ const d=new Date(); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+  genPass(){ const c='ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let p=''; for(let i=0;i<8;i++) p+=c[Math.floor(Math.random()*c.length)]; return 'LT-'+p; }
+  itemSet(id,key){ return (e)=>{ const v=e.target.value; this.setState(s=>({ items:s.items.map(it=> it.id===id? {...it,[key]: (key==='name')? v : (v===''?'':parseFloat(v)||0) } : it) })); }; }
+  addItem(){ this.setState(s=>({ items:[...s.items,{ id:s._uid, name:'', qty:1, total:0 }], _uid:s._uid+1 })); }
+  delItem(id){ this.setState(s=>({ items:s.items.filter(it=>it.id!==id) })); }
+  dupItem(id){ this.setState(s=>{ const it=s.items.find(x=>x.id===id); if(!it) return {}; const copy={...it,id:s._uid}; const idx=s.items.findIndex(x=>x.id===id); const arr=[...s.items]; arr.splice(idx+1,0,copy); return {items:arr,_uid:s._uid+1}; }); }
+}
+</script>
+</body>
+</html>

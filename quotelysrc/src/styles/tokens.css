@@ -1,0 +1,99 @@
+:root {
+  --bg: #eef2ee;
+  --panel: #ffffff;
+  --panel-2: #f7f9f7;
+  --border: #e6eae6;
+  --ink: #16201b;
+  --ink-2: #5c685f;
+  --ink-3: #9aa39c;
+  --field: #f4f7f4;
+  --green: #22673a;
+  --green-2: #2f8f57;
+  --green-soft: #eef4ef;
+  --maroon: #7c1825;
+  --shadow: 0 1px 2px rgba(20, 40, 28, 0.04), 0 8px 24px rgba(20, 40, 28, 0.06);
+}
+
+[data-theme='dark'] {
+  --bg: #0b0f0d;
+  --panel: #131916;
+  --border: #222b25;
+  --ink: #eaf0ec;
+  --ink-2: #9aa79f;
+  --ink-3: #5f6b63;
+  --field: #1a221d;
+  --green: #3f9d6a;
+  --green-2: #4fb87e;
+  --green-soft: #16241b;
+  --maroon: #c76b75;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  margin: 0;
+  min-height: 100vh;
+}
+
+body {
+  font-family: 'Manrope', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  transition: background 0.3s, color 0.3s;
+}
+
+::selection {
+  background: rgba(34, 103, 58, 0.18);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--ink-3);
+}
+
+button {
+  font-family: 'Manrope', sans-serif;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translate(-50%, 16px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+@keyframes rowIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.08); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Always-present, full-size A4 copy used only for printing / Save-as-PDF.
+   The sheet itself is sized in physical mm (see QuoteSheet printMode) so it fills
+   an exact A4 page regardless of OS display scaling or printer DPI. */
+#print-root {
+  position: fixed;
+  left: -10000px;
+  top: 0;
+  background: #fff;
+}
+
+@media print {
+  @page { size: A4; margin: 0; }
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+  body * { visibility: hidden !important; }
+  #print-root, #print-root * { visibility: visible !important; }
+  #print-root {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+  }
+}
