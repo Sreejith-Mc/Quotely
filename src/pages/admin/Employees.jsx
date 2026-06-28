@@ -117,7 +117,7 @@ export default function Employees() {
                     {emp.active ? 'Active' : 'Disabled'}
                   </button>
                 </div>
-                <div style={{ textAlign: 'right' }}>
+                <div style={{ textAlign: emp.id === myId ? 'center' : 'right' }}>
                   {emp.id === myId ? (
                     <span style={{ color: 'var(--ink-3)', fontSize: 12 }} title="You can't remove your own account">—</span>
                   ) : (
