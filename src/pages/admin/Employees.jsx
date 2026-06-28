@@ -4,6 +4,7 @@ import { useToast } from '../../context/ToastContext.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { initialsOf } from '../../lib/calc.js';
 import AddEmployeeModal from './AddEmployeeModal.jsx';
+import ConfirmModal from '../../components/ConfirmModal.jsx';
 
 export default function Employees() {
   const toast = useToast();
@@ -11,6 +12,7 @@ export default function Employees() {
   const myId = session?.user?.id;
   const [employees, setEmployees] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [pendingRemove, setPendingRemove] = useState(null);
 
   async function load() {
     const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
@@ -41,8 +43,10 @@ export default function Employees() {
     load();
   }
 
-  async function removeEmployee(emp) {
-    if (!window.confirm(`Remove ${emp.name || emp.email}? This permanently deletes their account and login access. Their past quotations are kept (shown as created by their name).`)) return;
+  async function confirmRemove() {
+    const emp = pendingRemove;
+    setPendingRemove(null);
+    if (!emp) return;
     const { data: { session: s } } = await supabase.auth.getSession();
     const res = await fetch('/api/delete-employee', {
       method: 'POST',
@@ -117,7 +121,7 @@ export default function Employees() {
                   {emp.id === myId ? (
                     <span style={{ color: 'var(--ink-3)', fontSize: 12 }} title="You can't remove your own account">—</span>
                   ) : (
-                    <button onClick={() => removeEmployee(emp)} title="Remove employee" style={{ border: '1px solid var(--border)', background: 'var(--panel)', color: 'var(--maroon)', cursor: 'pointer', borderRadius: 8, padding: '5px 9px', font: '600 12px Manrope' }}>🗑</button>
+                    <button onClick={() => setPendingRemove(emp)} title="Remove employee" style={{ border: '1px solid var(--border)', background: 'var(--panel)', color: 'var(--maroon)', cursor: 'pointer', borderRadius: 8, padding: '5px 9px', font: '600 12px Manrope' }}>🗑</button>
                   )}
                 </div>
               </div>
@@ -126,6 +130,15 @@ export default function Employees() {
         </div>
       </div>
       {modalOpen && <AddEmployeeModal onClose={() => setModalOpen(false)} onInvite={invite} />}
+      <ConfirmModal
+        open={!!pendingRemove}
+        title="Remove employee?"
+        message={`This permanently deletes ${pendingRemove?.name || pendingRemove?.email}'s account and login access. Their past quotations are kept (still shown under their name).`}
+        confirmLabel="Remove"
+        danger
+        onConfirm={confirmRemove}
+        onCancel={() => setPendingRemove(null)}
+      />
     </>
   );
 }

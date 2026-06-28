@@ -5,6 +5,7 @@ import { money } from '../../lib/calc.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useIsMobile } from '../../hooks/useIsMobile.js';
+import ConfirmModal from '../../components/ConfirmModal.jsx';
 
 const STATUSES = ['Draft', 'Sent', 'Accepted'];
 
@@ -17,6 +18,7 @@ export default function Overview() {
   const [stats, setStats] = useState(null);
   const [recent, setRecent] = useState([]);
   const [history, setHistory] = useState([]);
+  const [pendingDelete, setPendingDelete] = useState(null);
 
   const load = useCallback(async () => {
     const monthStart = new Date();
@@ -62,8 +64,10 @@ export default function Overview() {
     load();
   }
 
-  async function deleteQuote(q) {
-    if (!window.confirm(`Delete ${q.number}? This cannot be undone.`)) return;
+  async function confirmDelete() {
+    const q = pendingDelete;
+    setPendingDelete(null);
+    if (!q) return;
     const { error } = await supabase.from('quotations').delete().eq('id', q.id);
     if (error) { toast('Could not delete quotation'); return; }
     toast(`${q.number} deleted`);
@@ -111,7 +115,7 @@ export default function Overview() {
                   </div>
                   <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
                     <button onClick={() => navigate(`/edit/${q.id}`)} title="Edit" style={{ border: '1px solid var(--border)', background: 'var(--panel)', color: 'var(--ink-2)', cursor: 'pointer', borderRadius: 8, padding: '5px 9px', font: '600 12px Manrope' }}>✎</button>
-                    <button onClick={() => deleteQuote(q)} title="Delete" style={{ border: '1px solid var(--border)', background: 'var(--panel)', color: 'var(--maroon)', cursor: 'pointer', borderRadius: 8, padding: '5px 9px', font: '600 12px Manrope' }}>🗑</button>
+                    <button onClick={() => setPendingDelete(q)} title="Delete" style={{ border: '1px solid var(--border)', background: 'var(--panel)', color: 'var(--maroon)', cursor: 'pointer', borderRadius: 8, padding: '5px 9px', font: '600 12px Manrope' }}>🗑</button>
                   </div>
                 </div>
               ))}
@@ -140,6 +144,15 @@ export default function Overview() {
         </div>
       </div>
 
+      <ConfirmModal
+        open={!!pendingDelete}
+        title="Delete quotation?"
+        message={`${pendingDelete?.number} will be permanently deleted. This cannot be undone.`}
+        confirmLabel="Delete"
+        danger
+        onConfirm={confirmDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
     </>
   );
 }
