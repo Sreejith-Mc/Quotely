@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { initialsOf } from '../../lib/calc.js';
 import AddEmployeeModal from './AddEmployeeModal.jsx';
 import ConfirmModal from '../../components/ConfirmModal.jsx';
+import Tooltip from '../../components/Tooltip.jsx';
 
 export default function Employees() {
   const toast = useToast();
@@ -119,9 +120,9 @@ export default function Employees() {
                 </div>
                 <div style={{ textAlign: 'center' }}>
                   {emp.id === myId ? (
-                    <span style={{ color: 'var(--ink-3)', fontSize: 12 }} title="You can't remove your own account">—</span>
+                    <Tooltip label="You can't remove your own account"><span style={{ color: 'var(--ink-3)', fontSize: 12 }}>—</span></Tooltip>
                   ) : (
-                    <button onClick={() => setPendingRemove(emp)} title="Remove employee" style={{ border: '1px solid var(--border)', background: 'var(--panel)', color: 'var(--maroon)', cursor: 'pointer', borderRadius: 8, padding: '5px 9px', font: '600 12px Manrope' }}>🗑</button>
+                    <Tooltip label="Remove employee"><button onClick={() => setPendingRemove(emp)} style={{ border: '1px solid var(--border)', background: 'var(--panel)', color: 'var(--maroon)', cursor: 'pointer', borderRadius: 8, padding: '5px 9px', font: '600 12px Manrope' }}>🗑</button></Tooltip>
                   )}
                 </div>
               </div>

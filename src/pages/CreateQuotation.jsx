@@ -13,6 +13,7 @@ import { useFitSheet } from '../hooks/useFitSheet.js';
 import { useIsMobile } from '../hooks/useIsMobile.js';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import Tooltip from '../components/Tooltip.jsx';
 
 let uidCounter = 1;
 
@@ -305,7 +306,7 @@ export default function CreateQuotation() {
                       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                         <span style={{ width: 22, height: 22, flexShrink: 0, borderRadius: 6, background: 'var(--green-soft)', color: 'var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center', font: "700 11px 'JetBrains Mono'" }}>{i + 1}</span>
                         <input value={it.name} onChange={(e) => setItemField(it.id, 'name', e.target.value)} placeholder="Item or service name" style={{ ...inputStyle, flex: 1, minWidth: 0, font: '600 13px Manrope' }} />
-                        <button onClick={() => delItem(it.id)} title="Delete" style={delBtnStyle}>✕</button>
+                        <Tooltip label="Delete item"><button onClick={() => delItem(it.id)} style={delBtnStyle}>✕</button></Tooltip>
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 8, marginTop: 8, paddingLeft: 30 }}>
                         <div>
@@ -382,14 +383,18 @@ export default function CreateQuotation() {
               <input type="checkbox" checked={showAmount} disabled={!showRate} onChange={(e) => setShowAmount(e.target.checked)} style={checkboxStyle} />
               <span style={checkTextStyle}>Show amount</span>
             </label>
-            <label style={checkLabelStyle} title="Show each item's warranty period on the quote (works even when rate is off)">
-              <input type="checkbox" checked={showWarranty} onChange={(e) => setShowWarranty(e.target.checked)} style={checkboxStyle} />
-              <span style={checkTextStyle}>Show warranty</span>
-            </label>
-            <label style={checkLabelStyle} title="Allow the quotation to span multiple pages">
-              <input type="checkbox" checked={multiPage} onChange={(e) => setMultiPage(e.target.checked)} style={checkboxStyle} />
-              <span style={checkTextStyle}>Multi-page</span>
-            </label>
+            <Tooltip label="Show each item's warranty period on the quote (works even when rate is off)">
+              <label style={checkLabelStyle}>
+                <input type="checkbox" checked={showWarranty} onChange={(e) => setShowWarranty(e.target.checked)} style={checkboxStyle} />
+                <span style={checkTextStyle}>Show warranty</span>
+              </label>
+            </Tooltip>
+            <Tooltip label="Allow the quotation to span multiple pages">
+              <label style={checkLabelStyle}>
+                <input type="checkbox" checked={multiPage} onChange={(e) => setMultiPage(e.target.checked)} style={checkboxStyle} />
+                <span style={checkTextStyle}>Multi-page</span>
+              </label>
+            </Tooltip>
           </div>
           <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
             <button onClick={() => setPdfOpen(true)} style={ghostBtnStyle}>⤢ Preview</button>

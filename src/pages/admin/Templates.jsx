@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useSettings } from '../../context/SettingsContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { TEMPLATES, ACCENTS } from '../../components/templates.js';
+import Tooltip from '../../components/Tooltip.jsx';
 
 export default function Templates() {
   const { template, saveTemplate } = useSettings();
@@ -80,7 +81,7 @@ function ColorPicker({ value, onPick }) {
               {ACCENTS.map((a) => {
                 const sel = a.hex.toLowerCase() === (value || '').toLowerCase();
                 return (
-                  <button key={a.hex} title={a.name} onClick={() => { onPick(a.hex); setOpen(false); }} style={{ width: 38, height: 38, borderRadius: 10, background: a.hex, cursor: 'pointer', border: sel ? '3px solid var(--ink)' : '1px solid rgba(0,0,0,0.1)', boxShadow: sel ? '0 0 0 2px var(--panel)' : 'none' }} />
+                  <Tooltip key={a.hex} label={a.name}><button onClick={() => { onPick(a.hex); setOpen(false); }} style={{ width: 38, height: 38, borderRadius: 10, background: a.hex, cursor: 'pointer', border: sel ? '3px solid var(--ink)' : '1px solid rgba(0,0,0,0.1)', boxShadow: sel ? '0 0 0 2px var(--panel)' : 'none' }} /></Tooltip>
                 );
               })}
             </div>

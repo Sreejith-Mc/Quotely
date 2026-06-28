@@ -6,6 +6,7 @@ import { useToast } from '../../context/ToastContext.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useIsMobile } from '../../hooks/useIsMobile.js';
 import ConfirmModal from '../../components/ConfirmModal.jsx';
+import Tooltip from '../../components/Tooltip.jsx';
 
 const STATUSES = ['Draft', 'Sent', 'Accepted'];
 
@@ -114,8 +115,8 @@ export default function Overview() {
                     </select>
                   </div>
                   <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                    <button onClick={() => navigate(`/edit/${q.id}`)} title="Edit" style={{ border: '1px solid var(--border)', background: 'var(--panel)', color: 'var(--ink-2)', cursor: 'pointer', borderRadius: 8, padding: '5px 9px', font: '600 12px Manrope' }}>✎</button>
-                    <button onClick={() => setPendingDelete(q)} title="Delete" style={{ border: '1px solid var(--border)', background: 'var(--panel)', color: 'var(--maroon)', cursor: 'pointer', borderRadius: 8, padding: '5px 9px', font: '600 12px Manrope' }}>🗑</button>
+                    <Tooltip label="Edit"><button onClick={() => navigate(`/edit/${q.id}`)} style={{ border: '1px solid var(--border)', background: 'var(--panel)', color: 'var(--ink-2)', cursor: 'pointer', borderRadius: 8, padding: '5px 9px', font: '600 12px Manrope' }}>✎</button></Tooltip>
+                    <Tooltip label="Delete"><button onClick={() => setPendingDelete(q)} style={{ border: '1px solid var(--border)', background: 'var(--panel)', color: 'var(--maroon)', cursor: 'pointer', borderRadius: 8, padding: '5px 9px', font: '600 12px Manrope' }}>🗑</button></Tooltip>
                   </div>
                 </div>
               ))}

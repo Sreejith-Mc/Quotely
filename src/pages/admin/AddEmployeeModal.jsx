@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { genTempPassword } from '../../lib/calc.js';
+import Tooltip from '../../components/Tooltip.jsx';
 
 export default function AddEmployeeModal({ onClose, onInvite }) {
   const [name, setName] = useState('');
@@ -37,7 +38,7 @@ export default function AddEmployeeModal({ onClose, onInvite }) {
         <label style={labelStyle}>Password</label>
         <div style={{ display: 'flex', gap: 8, marginBottom: 4 }}>
           <input value={password} onChange={(e) => setPassword(e.target.value)} style={{ ...fieldStyle, fontFamily: "'JetBrains Mono'" }} />
-          <button onClick={() => setPassword(genTempPassword())} title="Generate a random password" style={{ border: '1px solid var(--border)', background: 'var(--field)', color: 'var(--ink)', cursor: 'pointer', borderRadius: 10, padding: '0 14px', font: '600 12px Manrope' }}>↻</button>
+          <Tooltip label="Generate a random password"><button onClick={() => setPassword(genTempPassword())} style={{ border: '1px solid var(--border)', background: 'var(--field)', color: 'var(--ink)', cursor: 'pointer', borderRadius: 10, padding: '0 14px', height: '100%', font: '600 12px Manrope' }}>↻</button></Tooltip>
         </div>
         <p style={{ font: '500 11px Manrope', color: 'var(--ink-3)', margin: '0 0 8px' }}>Type a custom password (easier to share), or press ↻ to generate one. Minimum 6 characters.</p>
 

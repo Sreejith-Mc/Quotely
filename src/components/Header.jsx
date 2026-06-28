@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
 import { initialsOf } from '../lib/calc.js';
 import { useIsMobile } from '../hooks/useIsMobile.js';
+import Tooltip from './Tooltip.jsx';
 
 export default function Header() {
   const navigate = useNavigate();
@@ -52,8 +53,8 @@ export default function Header() {
       )}
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, position: 'relative' }}>
-        <button onClick={() => { setMenuOpen((v) => !v); setProfileOpen(false); }} title="All screens" style={iconBtnStyle(true)}>{isMobile ? '▦' : '▦ Screens'}</button>
-        <button onClick={toggleDark} title="Toggle theme" style={{ ...iconBtnStyle(false), width: 36, height: 36, fontSize: 15 }}>{dark ? '☀' : '☾'}</button>
+        <Tooltip label="All screens" place="bottom"><button onClick={() => { setMenuOpen((v) => !v); setProfileOpen(false); }} style={iconBtnStyle(true)}>{isMobile ? '▦' : '▦ Screens'}</button></Tooltip>
+        <Tooltip label={dark ? 'Light mode' : 'Dark mode'} place="bottom"><button onClick={toggleDark} style={{ ...iconBtnStyle(false), width: 36, height: 36, fontSize: 15 }}>{dark ? '☀' : '☾'}</button></Tooltip>
 
         {loggedIn && profile && (
           <button onClick={() => { setProfileOpen((v) => !v); setMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: 9, border: '1px solid var(--border)', background: 'var(--panel)', cursor: 'pointer', padding: isMobile ? 5 : '5px 12px 5px 6px', borderRadius: 11, marginLeft: 2 }}>
