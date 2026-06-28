@@ -402,7 +402,9 @@ export default function CreateQuotation() {
             <button onClick={downloadPdf} style={primaryBtnStyle}>↓ Download PDF</button>
           </div>
         </div>
-        <div ref={outerRef} style={{ flex: 1, overflow: 'hidden', padding: isMobile ? 12 : 20, display: 'flex', alignItems: 'center', justifyContent: 'center', height: isMobile ? '82vh' : undefined }}>
+        <div ref={outerRef} style={isMobile
+          ? { height: '78vh', overflow: 'hidden', padding: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }
+          : { flex: 1, overflow: 'hidden', padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div ref={wrapRef} style={{ position: 'relative', overflow: 'hidden', boxShadow: '0 1px 3px rgba(20,40,28,0.10),0 18px 50px rgba(20,40,28,0.16)', borderRadius: 3 }}>
             <div ref={innerRef} style={{ width: 794, background: '#fff' }}>
               <QuoteSheet data={sheetData} />
