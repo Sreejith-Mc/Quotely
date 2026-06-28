@@ -411,9 +411,9 @@ export default function CreateQuotation() {
             </div>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isMobile ? '12px 16px' : '12px 22px', borderTop: '1px solid var(--border)', background: 'var(--panel)', flexWrap: 'wrap', gap: 10 }}>
-          <span style={{ font: '500 11px Manrope', color: 'var(--ink-3)' }}>Fits to view · exported as pixel-perfect A4 PDF</span>
-          <button onClick={generate} disabled={saving} style={{ ...primaryBtnStyle, padding: '10px 20px', borderRadius: 11, fontSize: 13, opacity: saving ? 0.7 : 1, flex: isMobile ? 1 : undefined }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isMobile ? '12px 16px' : '12px 22px', borderTop: '1px solid var(--border)', background: 'var(--panel)', flexWrap: isMobile ? 'nowrap' : 'wrap', gap: 10 }}>
+          <span style={{ font: '500 11px Manrope', color: 'var(--ink-3)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{isMobile ? 'Fits to view' : 'Fits to view · exported as pixel-perfect A4 PDF'}</span>
+          <button onClick={generate} disabled={saving} style={{ ...primaryBtnStyle, padding: '10px 20px', borderRadius: 11, fontSize: 13, opacity: saving ? 0.7 : 1, whiteSpace: 'nowrap', flexShrink: 0 }}>
             {saving ? (editId ? 'Updating…' : 'Generating…') : (editId ? 'Update Quotation →' : 'Generate Quotation →')}
           </button>
         </div>
