@@ -44,8 +44,8 @@ export default function AdminLayout() {
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '232px 1fr', minHeight: 'calc(100vh - 62px)' }}>
-      <aside style={{ borderRight: '1px solid var(--border)', background: 'var(--panel)', padding: '18px 12px', display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '232px 1fr', gridTemplateRows: '1fr', height: 'calc(100vh - 62px)' }}>
+      <aside style={{ borderRight: '1px solid var(--border)', background: 'var(--panel)', padding: '18px 12px', display: 'flex', flexDirection: 'column', gap: 3, overflowY: 'auto' }}>
         <div style={{ font: '700 10px Manrope', color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '6px 12px 8px' }}>{isAdmin ? 'Admin' : 'Workspace'}</div>
         {nav.map(([id, label, icon]) => (
           <NavLink key={id} to={id} style={({ isActive }) => navStyle(isActive)}>
