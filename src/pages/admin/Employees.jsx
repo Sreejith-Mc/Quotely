@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../supabaseClient.js';
 import { useToast } from '../../context/ToastContext.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
 import { initialsOf } from '../../lib/calc.js';
 import AddEmployeeModal from './AddEmployeeModal.jsx';
 
 export default function Employees() {
   const toast = useToast();
+  const { session } = useAuth();
+  const myId = session?.user?.id;
   const [employees, setEmployees] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -38,6 +41,23 @@ export default function Employees() {
     load();
   }
 
+  async function removeEmployee(emp) {
+    if (!window.confirm(`Remove ${emp.name || emp.email}? This permanently deletes their account and login access. Their past quotations are kept (shown as created by their name).`)) return;
+    const { data: { session: s } } = await supabase.auth.getSession();
+    const res = await fetch('/api/delete-employee', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${s?.access_token}` },
+      body: JSON.stringify({ id: emp.id }),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      toast(json.error || 'Could not remove employee');
+      return;
+    }
+    toast(`${emp.name || emp.email} removed`);
+    load();
+  }
+
   async function invite({ name, email, password }) {
     const {
       data: { session },
@@ -66,13 +86,13 @@ export default function Employees() {
       </div>
       <div style={{ background: 'var(--panel)', border: '1px solid var(--border)', borderRadius: 16, boxShadow: 'var(--shadow)', overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
-          <div style={{ minWidth: 520 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '40px 1fr 1fr 120px 100px', gap: 12, padding: '11px 18px', font: '600 10px Manrope', color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid var(--border)' }}>
-              <div></div><div>Name</div><div>Email</div><div>Role</div><div style={{ textAlign: 'right' }}>Status</div>
+          <div style={{ minWidth: 560 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '40px 1fr 1fr 120px 90px 48px', gap: 12, padding: '11px 18px', font: '600 10px Manrope', color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid var(--border)' }}>
+              <div></div><div>Name</div><div>Email</div><div>Role</div><div style={{ textAlign: 'right' }}>Status</div><div></div>
             </div>
             {employees.length === 0 && <div style={{ padding: '24px 18px', color: 'var(--ink-3)', font: '500 13px Manrope' }}>No employees yet.</div>}
             {employees.map((emp) => (
-              <div key={emp.id} style={{ display: 'grid', gridTemplateColumns: '40px 1fr 1fr 120px 100px', gap: 12, padding: '11px 18px', alignItems: 'center', borderBottom: '1px solid var(--border)', fontSize: 13 }}>
+              <div key={emp.id} style={{ display: 'grid', gridTemplateColumns: '40px 1fr 1fr 120px 90px 48px', gap: 12, padding: '11px 18px', alignItems: 'center', borderBottom: '1px solid var(--border)', fontSize: 13 }}>
                 <span style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--green-soft)', color: 'var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center', font: '800 11px Manrope' }}>{initialsOf(emp.name)}</span>
                 <div style={{ fontWeight: 600, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{emp.name || '—'}</div>
                 <div style={{ color: 'var(--ink-2)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{emp.email}</div>
@@ -92,6 +112,13 @@ export default function Employees() {
                   >
                     {emp.active ? 'Active' : 'Disabled'}
                   </button>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  {emp.id === myId ? (
+                    <span style={{ color: 'var(--ink-3)', fontSize: 12 }} title="You can't remove your own account">—</span>
+                  ) : (
+                    <button onClick={() => removeEmployee(emp)} title="Remove employee" style={{ border: '1px solid var(--border)', background: 'var(--panel)', color: 'var(--maroon)', cursor: 'pointer', borderRadius: 8, padding: '5px 9px', font: '600 12px Manrope' }}>🗑</button>
+                  )}
                 </div>
               </div>
             ))}
