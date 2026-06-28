@@ -12,7 +12,10 @@ export default function Tooltip({ label, children, place = 'top', style }) {
     const el = ref.current;
     if (!el) return;
     const r = el.getBoundingClientRect();
-    setPos({ x: r.left + r.width / 2, y: place === 'bottom' ? r.bottom + 8 : r.top - 8 });
+    // Keep the (up to ~260px wide) tooltip on screen so it never gets shrink-wrapped
+    // into a narrow column near the viewport edge.
+    const x = Math.min(Math.max(r.left + r.width / 2, 134), window.innerWidth - 134);
+    setPos({ x, y: place === 'bottom' ? r.bottom + 8 : r.top - 8 });
     setShow(true);
   }
 
@@ -28,7 +31,7 @@ export default function Tooltip({ label, children, place = 'top', style }) {
             transform: `translate(-50%, ${place === 'bottom' ? '0' : '-100%'})`,
             background: 'var(--ink)', color: 'var(--panel)',
             font: '600 11px Manrope', padding: '6px 10px', borderRadius: 8,
-            maxWidth: 230, lineHeight: 1.4, textAlign: 'center',
+            width: 'max-content', maxWidth: 260, lineHeight: 1.4, textAlign: 'center',
             zIndex: 2000, pointerEvents: 'none', boxShadow: 'var(--shadow)',
           }}
         >
