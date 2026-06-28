@@ -14,6 +14,7 @@ This app is a React + Vite SPA backed by Supabase (Postgres, Auth, Storage) and 
    - `0006_show_warranty.sql` — adds the per-quotation "Show warranty" flag.
    - `0007_template_accent.sql` — adds the accent-colour column for the template.
    - `0008_employee_delete.sql` — lets an employee be removed without losing their quotations/history.
+   - `0009_products_stock.sql` — product catalogue (Excel upload) + stock that decrements on accepted quotes.
 3. In **Authentication > Providers**, make sure Email/Password sign-in is enabled.
    - **Turn OFF public sign-ups** so only admin-created accounts can log in: in **Authentication > Sign In / Providers** (or **Settings**), disable **"Allow new users to sign up"**. Accounts are then only created by an admin via the in-app "Add Employee" button (which uses the service-role key server-side). The whole app is gated behind login, so without this, someone could otherwise self-register through the API.
 4. Create your first admin account:

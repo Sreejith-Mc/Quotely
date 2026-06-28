@@ -27,6 +27,7 @@ export default function Header() {
         { label: 'Branding', icon: '◑', to: '/admin/branding' },
         { label: 'Company Info', icon: '◧', to: '/admin/company' },
         { label: 'Employees', icon: '◍', to: '/admin/employees' },
+        { label: 'Products', icon: '◫', to: '/admin/products' },
         { label: 'Tax Settings', icon: '%', to: '/admin/tax' },
         { label: 'Numbering', icon: '#', to: '/admin/numbering' },
         { label: 'Terms', icon: '¶', to: '/admin/terms' },

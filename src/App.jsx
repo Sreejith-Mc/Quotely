@@ -12,6 +12,7 @@ import TaxSettings from './pages/admin/TaxSettings.jsx';
 import Numbering from './pages/admin/Numbering.jsx';
 import Terms from './pages/admin/Terms.jsx';
 import Employees from './pages/admin/Employees.jsx';
+import Products from './pages/admin/Products.jsx';
 import Templates from './pages/admin/Templates.jsx';
 import SettingsTab from './pages/admin/SettingsTab.jsx';
 import { useAuth } from './context/AuthContext.jsx';
@@ -55,6 +56,7 @@ export default function App() {
           <Route path="numbering" element={<RequireAdmin><Numbering /></RequireAdmin>} />
           <Route path="terms" element={<RequireAdmin><Terms /></RequireAdmin>} />
           <Route path="employees" element={<RequireAdmin><Employees /></RequireAdmin>} />
+          <Route path="products" element={<RequireAdmin><Products /></RequireAdmin>} />
           <Route path="templates" element={<RequireAdmin><Templates /></RequireAdmin>} />
           <Route path="settings" element={<RequireAdmin><SettingsTab /></RequireAdmin>} />
         </Route>

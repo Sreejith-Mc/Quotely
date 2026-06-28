@@ -7,6 +7,7 @@ const NAV = [
   ['branding', 'Branding', '◑', 'Logo and seal — applied to all new quotations'],
   ['company', 'Company Info', '🏢', 'Details printed on every quotation — employees can never edit these'],
   ['employees', 'Employees', '◍', 'Create, edit and manage your team'],
+  ['products', 'Products', '◫', 'Upload your stock list — used for item search & stock tracking'],
   ['tax', 'Tax Settings', '%', 'GST percentages applied to every new quotation'],
   ['numbering', 'Numbering', '#', 'Control prefix and sequence'],
   ['terms', 'Terms', '¶', 'Default terms printed on every quotation'],

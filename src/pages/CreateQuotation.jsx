@@ -14,6 +14,7 @@ import { useIsMobile } from '../hooks/useIsMobile.js';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Tooltip from '../components/Tooltip.jsx';
+import ProductSearchInput from '../components/ProductSearchInput.jsx';
 
 let uidCounter = 1;
 
@@ -104,6 +105,13 @@ export default function CreateQuotation() {
   function setItemField(id, key, value) {
     const isText = key === 'name' || key === 'warranty';
     setItems((arr) => arr.map((it) => (it.id === id ? { ...it, [key]: isText ? value : value === '' ? '' : parseFloat(value) || 0 } : it)));
+  }
+  // Free-typing the name unlinks any selected product; picking from search links it.
+  function setItemName(id, name) {
+    setItems((arr) => arr.map((it) => (it.id === id ? { ...it, name, product_id: undefined } : it)));
+  }
+  function pickProduct(id, p) {
+    setItems((arr) => arr.map((it) => (it.id === id ? { ...it, name: p.name, product_id: p.id, total: p.price && p.price > 0 ? p.price : it.total } : it)));
   }
   function toggleManual() {
     setManualGst((m) => {
@@ -305,7 +313,7 @@ export default function CreateQuotation() {
                     <div key={it.id} style={{ border: '1px solid var(--border)', borderRadius: 12, padding: '11px 12px', background: 'var(--panel-2)', animation: 'rowIn .18s ease' }}>
                       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                         <span style={{ width: 22, height: 22, flexShrink: 0, borderRadius: 6, background: 'var(--green-soft)', color: 'var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center', font: "700 11px 'JetBrains Mono'" }}>{i + 1}</span>
-                        <input value={it.name} onChange={(e) => setItemField(it.id, 'name', e.target.value)} placeholder="Item or service name" style={{ ...inputStyle, flex: 1, minWidth: 0, font: '600 13px Manrope' }} />
+                        <ProductSearchInput value={it.name} onType={(v) => setItemName(it.id, v)} onSelect={(p) => pickProduct(it.id, p)} placeholder="Search or type item name" style={{ ...inputStyle, width: '100%', font: '600 13px Manrope' }} />
                         <Tooltip label="Delete item"><button onClick={() => delItem(it.id)} style={delBtnStyle}>✕</button></Tooltip>
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 8, marginTop: 8, paddingLeft: 30 }}>
