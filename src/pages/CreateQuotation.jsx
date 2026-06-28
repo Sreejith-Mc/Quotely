@@ -111,7 +111,7 @@ export default function CreateQuotation() {
     setItems((arr) => arr.map((it) => (it.id === id ? { ...it, name, product_id: undefined } : it)));
   }
   function pickProduct(id, p) {
-    setItems((arr) => arr.map((it) => (it.id === id ? { ...it, name: p.name, product_id: p.id, total: p.price && p.price > 0 ? p.price : it.total } : it)));
+    setItems((arr) => arr.map((it) => (it.id === id ? { ...it, name: p.name } : it)));
   }
   function toggleManual() {
     setManualGst((m) => {

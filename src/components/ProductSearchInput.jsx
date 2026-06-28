@@ -15,7 +15,7 @@ export default function ProductSearchInput({ value, onType, onSelect, placeholde
     const t = setTimeout(async () => {
       const { data } = await supabase
         .from('products')
-        .select('id,name,price,stock')
+        .select('id,name')
         .ilike('name', `${q}%`)
         .order('name')
         .limit(8);
@@ -41,22 +41,16 @@ export default function ProductSearchInput({ value, onType, onSelect, placeholde
       />
       {open && results.length > 0 && (
         <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 30, background: 'var(--panel)', border: '1px solid var(--border)', borderRadius: 10, boxShadow: 'var(--shadow)', maxHeight: 240, overflowY: 'auto' }}>
-          {results.map((p) => {
-            const out = Number(p.stock) <= 0;
-            return (
-              <button
-                key={p.id}
-                type="button"
-                onMouseDown={(e) => { e.preventDefault(); onSelect(p); setOpen(false); }}
-                style={{ display: 'flex', width: '100%', boxSizing: 'border-box', alignItems: 'center', justifyContent: 'space-between', gap: 10, border: 'none', borderBottom: '1px solid var(--border)', background: 'transparent', cursor: 'pointer', padding: '9px 12px', textAlign: 'left' }}
-              >
-                <span style={{ font: '600 13px Manrope', color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
-                <span style={{ font: '600 10px Manrope', whiteSpace: 'nowrap', flexShrink: 0, color: out ? 'var(--maroon)' : 'var(--green)', background: out ? 'rgba(124,24,37,0.1)' : 'var(--green-soft)', padding: '2px 8px', borderRadius: 20 }}>
-                  {out ? 'Out of stock' : `In stock: ${p.stock}`}
-                </span>
-              </button>
-            );
-          })}
+          {results.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onMouseDown={(e) => { e.preventDefault(); onSelect(p); setOpen(false); }}
+              style={{ display: 'block', width: '100%', boxSizing: 'border-box', border: 'none', borderBottom: '1px solid var(--border)', background: 'transparent', cursor: 'pointer', padding: '9px 12px', textAlign: 'left', font: '600 13px Manrope', color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+            >
+              {p.name}
+            </button>
+          ))}
         </div>
       )}
     </div>
