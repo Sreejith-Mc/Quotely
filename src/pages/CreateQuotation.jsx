@@ -482,16 +482,13 @@ export default function CreateQuotation() {
               </label>
             </Tooltip>
           </div>
-          <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
-            <button onClick={() => setPdfOpen(true)} style={ghostBtnStyle}>⤢ Preview</button>
-            <button onClick={doPrint} style={ghostBtnStyle}>⎙ Print</button>
-            <button onClick={downloadPdf} style={primaryBtnStyle}>↓ Download PDF</button>
-            {canProfit && (
-              <Tooltip label="Export a copy that includes the profit — for admin use only">
-                <button onClick={downloadAdminPdf} style={{ border: 'none', background: 'var(--maroon)', color: '#fff', cursor: 'pointer', font: '700 12px Manrope', padding: '8px 14px', borderRadius: 9 }}>↓ Admin Export</button>
-              </Tooltip>
-            )}
-          </div>
+          <ActionsMenu
+            canProfit={canProfit}
+            onPreview={() => setPdfOpen(true)}
+            onPrint={doPrint}
+            onDownload={downloadPdf}
+            onAdminExport={downloadAdminPdf}
+          />
         </div>
         <div ref={outerRef} style={isMobile
           ? { height: '78vh', overflow: 'hidden', padding: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }
@@ -532,6 +529,40 @@ export default function CreateQuotation() {
         onClose={() => setSuccess(null)}
         onNewQuote={() => { if (editId) { navigate('/admin/overview'); } else { newQuote(); } }}
       />
+    </div>
+  );
+}
+
+// Collapses Preview / Print / Download / Admin Export into one dropdown so the toolbar
+// stays on a single line.
+function ActionsMenu({ canProfit, onPreview, onPrint, onDownload, onAdminExport }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    function onDoc(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, []);
+  const run = (fn) => { setOpen(false); fn(); };
+  const item = { display: 'flex', alignItems: 'center', gap: 9, width: '100%', boxSizing: 'border-box', border: 'none', background: 'transparent', cursor: 'pointer', padding: '10px 14px', textAlign: 'left', font: '600 13px Manrope', color: 'var(--ink)' };
+  return (
+    <div ref={ref} style={{ position: 'relative', flexShrink: 0 }}>
+      <button onClick={() => setOpen((v) => !v)} style={{ display: 'flex', alignItems: 'center', gap: 8, border: 'none', background: 'var(--green)', color: '#fff', cursor: 'pointer', font: '700 12px Manrope', padding: '9px 16px', borderRadius: 9 }}>
+        Actions <span style={{ fontSize: 10, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }}>▾</span>
+      </button>
+      {open && (
+        <div style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 40, minWidth: 196, background: 'var(--panel)', border: '1px solid var(--border)', borderRadius: 11, boxShadow: 'var(--shadow)', overflow: 'hidden', padding: '5px 0' }}>
+          <button onClick={() => run(onPreview)} style={item}><span style={{ width: 16, color: 'var(--ink-3)' }}>⤢</span> Preview</button>
+          <button onClick={() => run(onPrint)} style={item}><span style={{ width: 16, color: 'var(--ink-3)' }}>⎙</span> Print</button>
+          <button onClick={() => run(onDownload)} style={item}><span style={{ width: 16, color: 'var(--green)' }}>↓</span> Download PDF</button>
+          {canProfit && (
+            <>
+              <div style={{ height: 1, background: 'var(--border)', margin: '5px 0' }} />
+              <button onClick={() => run(onAdminExport)} style={{ ...item, color: 'var(--maroon)' }}><span style={{ width: 16 }}>↓</span> Admin Export</button>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -618,5 +649,4 @@ const clearBtnStyle = { border: '1px solid var(--border)', background: 'var(--pa
 const checkLabelStyle = { display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', userSelect: 'none' };
 const checkboxStyle = { width: 15, height: 15, accentColor: 'var(--green)', cursor: 'pointer' };
 const checkTextStyle = { font: '600 11px Manrope', color: 'var(--ink-2)' };
-const ghostBtnStyle = { border: '1px solid var(--border)', background: 'var(--panel)', color: 'var(--ink)', cursor: 'pointer', font: '600 12px Manrope', padding: '8px 13px', borderRadius: 9 };
 const primaryBtnStyle = { border: 'none', background: 'var(--green)', color: '#fff', cursor: 'pointer', font: '700 12px Manrope', padding: '8px 14px', borderRadius: 9 };
