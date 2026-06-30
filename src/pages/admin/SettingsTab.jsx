@@ -14,7 +14,7 @@ export default function SettingsTab() {
   const [savingProfit, setSavingProfit] = useState(false);
 
   useEffect(() => {
-    setMargin(profit.margin_percent != null ? String(profit.margin_percent) : '');
+    setMargin(profit.margin_percent ? String(profit.margin_percent) : '');
     setEmpSee(!!profit.employees_can_see);
   }, [profit]);
 

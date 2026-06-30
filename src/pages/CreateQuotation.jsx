@@ -53,7 +53,8 @@ export default function CreateQuotation() {
   // mode restores the quotation's own saved margin below).
   useEffect(() => {
     if (editId) return;
-    setMargin(profit.margin_percent != null ? String(profit.margin_percent) : '');
+    // Leave blank when 0 so the "0" placeholder shows instead of a literal 0.
+    setMargin(profit.margin_percent ? String(profit.margin_percent) : '');
   }, [profit, editId]);
 
   // Edit mode: load the existing quotation and prefill the builder.
@@ -85,7 +86,7 @@ export default function CreateQuotation() {
       setShowAmount(data.show_amount !== false);
       setShowRate(data.show_rate !== false);
       setShowWarranty(!!data.show_warranty);
-      setMargin(data.margin_percent != null ? String(data.margin_percent) : '');
+      setMargin(data.margin_percent ? String(data.margin_percent) : '');
       setRoundOff(data.round_off ? String(data.round_off) : '');
       setShowRoundOff(!!data.show_round_off);
       setEditMeta({ number: data.number, date: data.date, status: data.status, salesName: data.sales_staff_name, salesPhone: data.sales_staff_phone || '' });
