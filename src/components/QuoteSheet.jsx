@@ -113,6 +113,11 @@ export default function QuoteSheet({ data, printMode }) {
               </div>
             </>
           )}
+          {data.showRoundOff && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '6px 0', color: '#4a564e', borderTop: '1px solid #eef1ee' }}>
+              <span>Round Off</span><span style={{ fontFamily: tpl.mono }}>{data.roundOff}</span>
+            </div>
+          )}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, padding: '13px 16px', background: tpl.accSoft, borderRadius: 10 }}>
             <span style={{ fontSize: 13, fontWeight: 700, color: tpl.acc }}>Grand Total</span>
             <span style={{ fontFamily: tpl.mono, fontSize: 17, fontWeight: 700, color: tpl.acc }}>{data.grandTotal}</span>

@@ -34,6 +34,8 @@ export default function CreateQuotation() {
   const [showWarranty, setShowWarranty] = useState(false);
   const [multiPage, setMultiPage] = useState(false);
   const [margin, setMargin] = useState('');
+  const [roundOff, setRoundOff] = useState('');
+  const [showRoundOff, setShowRoundOff] = useState(false);
   const [custOpen, setCustOpen] = useState(true);
   const [pdfOpen, setPdfOpen] = useState(false);
   const [success, setSuccess] = useState(null);
@@ -84,6 +86,8 @@ export default function CreateQuotation() {
       setShowRate(data.show_rate !== false);
       setShowWarranty(!!data.show_warranty);
       setMargin(data.margin_percent != null ? String(data.margin_percent) : '');
+      setRoundOff(data.round_off ? String(data.round_off) : '');
+      setShowRoundOff(!!data.show_round_off);
       setEditMeta({ number: data.number, date: data.date, status: data.status, salesName: data.sales_staff_name });
     })();
     return () => { cancelled = true; };
@@ -139,14 +143,14 @@ export default function CreateQuotation() {
 
   const sheetData = useMemo(() => buildSheetData({
     company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms: terms.content || '', templateId: template.selected, accent: template.accent,
-    quoteNo: quoteNoPreview, date: today, salesStaff,
-  }), [company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms, template, quoteNoPreview, today, salesStaff]);
+    quoteNo: quoteNoPreview, date: today, salesStaff, roundOff, showRoundOff,
+  }), [company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms, template, quoteNoPreview, today, salesStaff, roundOff, showRoundOff]);
 
   // Admin-only copy — identical to the customer sheet but with the profit line shown.
   const adminSheetData = useMemo(() => buildSheetData({
     company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms: terms.content || '', templateId: template.selected, accent: template.accent,
-    quoteNo: quoteNoPreview, date: today, salesStaff, showProfit: true, margin,
-  }), [company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms, template, quoteNoPreview, today, salesStaff, margin]);
+    quoteNo: quoteNoPreview, date: today, salesStaff, roundOff, showRoundOff, showProfit: true, margin,
+  }), [company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms, template, quoteNoPreview, today, salesStaff, roundOff, showRoundOff, margin]);
 
   useFitSheet(outerRef, wrapRef, innerRef, { maxScale: 1.05, margin: 36 });
 
@@ -241,6 +245,8 @@ export default function CreateQuotation() {
       show_rate: showRate,
       show_warranty: showWarranty,
       margin_percent: parseFloat(margin) || 0,
+      round_off: parseFloat(roundOff) || 0,
+      show_round_off: showRoundOff,
       subtotal: t.subBase,
       cgst_total: t.cgstT,
       sgst_total: t.sgstT,
@@ -406,6 +412,25 @@ export default function CreateQuotation() {
             <span style={{ font: "700 24px 'JetBrains Mono'", color: '#fff' }}>{sheetData.grandTotal}</span>
           </div>
           <div style={{ font: '500 11px Manrope', color: 'rgba(255,255,255,0.7)', marginTop: 6, fontStyle: 'italic', lineHeight: 1.45 }}>{sheetData.grandWords}</div>
+        </div>
+
+        {/* Round-off — a flat +/- adjustment to the grand total. Always applied when
+            non-zero; the checkbox only controls whether the line is shown on the quote. */}
+        <div style={{ background: 'var(--panel)', border: '1px solid var(--border)', borderRadius: 16, padding: '16px 18px', boxShadow: 'var(--shadow)', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+            <div>
+              <div style={{ font: '700 13px Manrope', color: 'var(--ink)' }}>Round Off</div>
+              <div style={{ font: '500 11px Manrope', color: 'var(--ink-3)', marginTop: 2, maxWidth: 240, lineHeight: 1.45 }}>Added to the grand total. Use +2 or −2; leave 0 for none.</div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <input value={roundOff} onChange={(e) => setRoundOff(e.target.value)} inputMode="text" placeholder="0" style={{ width: 80, boxSizing: 'border-box', padding: '9px 10px', border: '1px solid var(--border)', background: 'var(--field)', color: 'var(--ink)', borderRadius: 9, font: "600 14px 'JetBrains Mono'", textAlign: 'right', outline: 'none' }} />
+              <span style={{ font: '600 13px Manrope', color: 'var(--ink-2)' }}>₹</span>
+            </div>
+          </div>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', userSelect: 'none', marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+            <input type="checkbox" checked={showRoundOff} onChange={(e) => setShowRoundOff(e.target.checked)} style={checkboxStyle} />
+            <span style={{ font: '600 12px Manrope', color: 'var(--ink-2)' }}>Show the round-off line on the quote</span>
+          </label>
         </div>
 
         {/* Margin / profit — admin-only (or employees if enabled in Settings). Never on
