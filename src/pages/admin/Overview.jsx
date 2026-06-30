@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../supabaseClient.js';
 import { money } from '../../lib/calc.js';
@@ -87,7 +87,7 @@ export default function Overview() {
         {stats.map((st) => (
           <div key={st.label} style={{ background: 'var(--panel)', border: '1px solid var(--border)', borderRadius: 16, padding: 18, boxShadow: 'var(--shadow)', minWidth: 0, overflow: 'hidden' }}>
             <div style={{ font: '600 11px Manrope', color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{st.label}</div>
-            <div style={{ font: "800 26px 'JetBrains Mono'", color: 'var(--ink)', margin: '8px 0 2px', lineHeight: 1.15, overflowWrap: 'anywhere', wordBreak: 'break-word' }}>{st.value}</div>
+            <StatValue value={st.value} />
             {st.delta && <div style={{ font: '600 11px Manrope', color: 'var(--green)' }}>{st.delta}</div>}
           </div>
         ))}
@@ -155,6 +155,32 @@ export default function Overview() {
         onCancel={() => setPendingDelete(null)}
       />
     </>
+  );
+}
+
+// Keeps a stat value on a single line, shrinking the font to fit the card width so it
+// can hold an arbitrarily long number without wrapping or overflowing.
+function StatValue({ value }) {
+  const boxRef = useRef(null);
+  const textRef = useRef(null);
+  const [scale, setScale] = useState(1);
+  useLayoutEffect(() => {
+    const box = boxRef.current, text = textRef.current;
+    if (!box || !text) return;
+    const fit = () => {
+      const avail = box.clientWidth;
+      const natural = text.scrollWidth;
+      setScale(natural > avail && natural > 0 ? avail / natural : 1);
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(box);
+    return () => ro.disconnect();
+  }, [value]);
+  return (
+    <div ref={boxRef} style={{ overflow: 'hidden', margin: '8px 0 2px', height: 30, display: 'flex', alignItems: 'center' }}>
+      <span ref={textRef} style={{ display: 'inline-block', whiteSpace: 'nowrap', transformOrigin: 'left center', transform: `scale(${scale})`, font: "800 26px 'JetBrains Mono'", color: 'var(--ink)', lineHeight: 1 }}>{value}</span>
+    </div>
   );
 }
 
