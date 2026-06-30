@@ -9,6 +9,7 @@ const DEFAULTS = {
   numbering: { prefix: 'QT-', next_number: 1, pad: 6 },
   terms: { content: '' },
   template: { selected: 'emerald', accent: '#22673a' },
+  profit: { margin_percent: 0, employees_can_see: false },
 };
 
 export function SettingsProvider({ children }) {
@@ -17,21 +18,25 @@ export function SettingsProvider({ children }) {
   const [numbering, setNumbering] = useState(DEFAULTS.numbering);
   const [terms, setTerms] = useState(DEFAULTS.terms);
   const [template, setTemplate] = useState(DEFAULTS.template);
+  const [profit, setProfit] = useState(DEFAULTS.profit);
   const [loading, setLoading] = useState(true);
 
   async function reload() {
-    const [c, t, n, tm, tp] = await Promise.all([
+    const [c, t, n, tm, tp, pr] = await Promise.all([
       supabase.from('company_settings').select('*').eq('id', 1).single(),
       supabase.from('tax_settings').select('*').eq('id', 1).single(),
       supabase.from('numbering_settings').select('*').eq('id', 1).single(),
       supabase.from('terms_settings').select('*').eq('id', 1).single(),
       supabase.from('template_settings').select('*').eq('id', 1).single(),
+      // Employees may not be allowed to read this row (RLS) — that's fine, it stays default.
+      supabase.from('profit_settings').select('*').eq('id', 1).single(),
     ]);
     if (c.data) setCompany(c.data);
     if (t.data) setTax(t.data);
     if (n.data) setNumbering(n.data);
     if (tm.data) setTerms(tm.data);
     if (tp.data) setTemplate(tp.data);
+    setProfit(pr.data || DEFAULTS.profit);
     setLoading(false);
   }
 
@@ -64,6 +69,11 @@ export function SettingsProvider({ children }) {
     if (!error && data) setTemplate(data);
     return { error };
   }
+  async function saveProfit(patch) {
+    const { data, error } = await supabase.from('profit_settings').update(patch).eq('id', 1).select().single();
+    if (!error && data) setProfit(data);
+    return { error };
+  }
   async function uploadBrandingFile(file, kind) {
     const path = `${kind}-${Date.now()}-${file.name}`;
     const { error: upErr } = await supabase.storage.from('branding').upload(path, file, { upsert: true });
@@ -73,8 +83,8 @@ export function SettingsProvider({ children }) {
   }
 
   const value = {
-    company, tax, numbering, terms, template, loading, reload,
-    saveCompany, saveTax, saveNumbering, saveTerms, saveTemplate, uploadBrandingFile,
+    company, tax, numbering, terms, template, profit, loading, reload,
+    saveCompany, saveTax, saveNumbering, saveTerms, saveTemplate, saveProfit, uploadBrandingFile,
   };
 
   return <SettingsCtx.Provider value={value}>{children}</SettingsCtx.Provider>;

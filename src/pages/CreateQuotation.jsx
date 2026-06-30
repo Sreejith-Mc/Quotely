@@ -21,8 +21,8 @@ let uidCounter = 1;
 export default function CreateQuotation() {
   const navigate = useNavigate();
   const { id: editId } = useParams();
-  const { loggedIn, profile, session } = useAuth();
-  const { company, tax, numbering, terms, template, reload } = useSettings();
+  const { loggedIn, profile, session, isAdmin } = useAuth();
+  const { company, tax, numbering, terms, template, profit, reload } = useSettings();
   const toast = useToast();
   const isMobile = useIsMobile();
 
@@ -33,6 +33,7 @@ export default function CreateQuotation() {
   const [showRate, setShowRate] = useState(true);
   const [showWarranty, setShowWarranty] = useState(false);
   const [multiPage, setMultiPage] = useState(false);
+  const [margin, setMargin] = useState('');
   const [custOpen, setCustOpen] = useState(true);
   const [pdfOpen, setPdfOpen] = useState(false);
   const [success, setSuccess] = useState(null);
@@ -42,6 +43,16 @@ export default function CreateQuotation() {
   const outerRef = useRef(null);
   const wrapRef = useRef(null);
   const innerRef = useRef(null);
+
+  // Profit/margin is admin-only by default; admins can open it to employees in Settings.
+  const canProfit = isAdmin || !!profit.employees_can_see;
+
+  // Seed the margin from the saved default once settings load (new quotes only; edit
+  // mode restores the quotation's own saved margin below).
+  useEffect(() => {
+    if (editId) return;
+    setMargin(profit.margin_percent != null ? String(profit.margin_percent) : '');
+  }, [profit, editId]);
 
   // Edit mode: load the existing quotation and prefill the builder.
   useEffect(() => {
@@ -72,6 +83,7 @@ export default function CreateQuotation() {
       setShowAmount(data.show_amount !== false);
       setShowRate(data.show_rate !== false);
       setShowWarranty(!!data.show_warranty);
+      setMargin(data.margin_percent != null ? String(data.margin_percent) : '');
       setEditMeta({ number: data.number, date: data.date, status: data.status, salesName: data.sales_staff_name });
     })();
     return () => { cancelled = true; };
@@ -130,12 +142,18 @@ export default function CreateQuotation() {
     quoteNo: quoteNoPreview, date: today, salesStaff,
   }), [company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms, template, quoteNoPreview, today, salesStaff]);
 
+  // Admin-only copy — identical to the customer sheet but with the profit line shown.
+  const adminSheetData = useMemo(() => buildSheetData({
+    company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms: terms.content || '', templateId: template.selected, accent: template.accent,
+    quoteNo: quoteNoPreview, date: today, salesStaff, showProfit: true, margin,
+  }), [company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms, template, quoteNoPreview, today, salesStaff, margin]);
+
   useFitSheet(outerRef, wrapRef, innerRef, { maxScale: 1.05, margin: 36 });
 
   // Render the off-screen A4 sheet to a jsPDF. Single page by default (scaled to fit);
   // multi-page only when the toggle is on AND the content actually overflows.
-  async function buildPdf() {
-    const el = document.getElementById('print-root')?.firstElementChild;
+  async function buildPdf(rootId = 'print-root') {
+    const el = document.getElementById(rootId)?.firstElementChild;
     if (!el) return null;
     const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
     const imgData = canvas.toDataURL('image/jpeg', 0.98);
@@ -183,6 +201,19 @@ export default function CreateQuotation() {
     }
   }
 
+  // Admin Export — the same quote with the profit line, from the off-screen admin copy.
+  async function downloadAdminPdf() {
+    if (!canProfit) return;
+    toast('Preparing admin export…');
+    try {
+      const pdf = await buildPdf('print-root-admin');
+      if (!pdf) { toast('Could not generate PDF'); return; }
+      pdf.save(`${adminSheetData.quoteNo || 'Quotation'}-ADMIN.pdf`);
+    } catch {
+      toast('Could not generate PDF');
+    }
+  }
+
   async function generate() {
     if (!loggedIn) {
       toast('Sign in as an employee to save this quotation');
@@ -209,6 +240,7 @@ export default function CreateQuotation() {
       show_amount: showAmount,
       show_rate: showRate,
       show_warranty: showWarranty,
+      margin_percent: parseFloat(margin) || 0,
       subtotal: t.subBase,
       cgst_total: t.cgstT,
       sgst_total: t.sgstT,
@@ -375,6 +407,27 @@ export default function CreateQuotation() {
           </div>
           <div style={{ font: '500 11px Manrope', color: 'rgba(255,255,255,0.7)', marginTop: 6, fontStyle: 'italic', lineHeight: 1.45 }}>{sheetData.grandWords}</div>
         </div>
+
+        {/* Margin / profit — admin-only (or employees if enabled in Settings). Never on
+            the customer quote; only on the Admin Export. */}
+        {canProfit && (
+          <div style={{ background: 'var(--panel)', border: '1px dashed var(--maroon)', borderRadius: 16, padding: '16px 18px', boxShadow: 'var(--shadow)', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+              <div>
+                <div style={{ font: '700 13px Manrope', color: 'var(--maroon)' }}>Margin &amp; Profit · Admin</div>
+                <div style={{ font: '500 11px Manrope', color: 'var(--ink-3)', marginTop: 2 }}>Only on the Admin Export — never on the customer&apos;s quote.</div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <input value={margin} onChange={(e) => setMargin(e.target.value)} inputMode="decimal" placeholder="0" style={{ width: 72, boxSizing: 'border-box', padding: '9px 10px', border: '1px solid var(--border)', background: 'var(--field)', color: 'var(--ink)', borderRadius: 9, font: "600 14px 'JetBrains Mono'", textAlign: 'right', outline: 'none' }} />
+                <span style={{ font: '600 13px Manrope', color: 'var(--ink-2)' }}>%</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+              <span style={{ font: '700 12px Manrope', color: 'var(--ink-2)' }}>Profit</span>
+              <span style={{ font: "700 18px 'JetBrains Mono'", color: 'var(--maroon)' }}>{adminSheetData.profit}</span>
+            </div>
+          </div>
+        )}
         <div style={{ height: 8 }} />
       </div>
 
@@ -408,6 +461,11 @@ export default function CreateQuotation() {
             <button onClick={() => setPdfOpen(true)} style={ghostBtnStyle}>⤢ Preview</button>
             <button onClick={doPrint} style={ghostBtnStyle}>⎙ Print</button>
             <button onClick={downloadPdf} style={primaryBtnStyle}>↓ Download PDF</button>
+            {canProfit && (
+              <Tooltip label="Export a copy that includes the profit — for admin use only">
+                <button onClick={downloadAdminPdf} style={{ border: 'none', background: 'var(--maroon)', color: '#fff', cursor: 'pointer', font: '700 12px Manrope', padding: '8px 14px', borderRadius: 9 }}>↓ Admin Export</button>
+              </Tooltip>
+            )}
           </div>
         </div>
         <div ref={outerRef} style={isMobile
@@ -432,6 +490,13 @@ export default function CreateQuotation() {
       <div id="print-root">
         <QuoteSheet data={sheetData} printMode />
       </div>
+
+      {/* Off-screen admin copy (with profit) — only mounted when profit access is granted. */}
+      {canProfit && (
+        <div id="print-root-admin">
+          <QuoteSheet data={adminSheetData} printMode />
+        </div>
+      )}
 
       <PdfOverlay open={pdfOpen} onClose={() => setPdfOpen(false)} sheetData={sheetData} onDownload={downloadPdf} onPrint={doPrint} />
       <SuccessOverlay

@@ -80,7 +80,8 @@ button {
 /* Always-present, full-size A4 copy used only for printing / Save-as-PDF.
    The sheet itself is sized in physical mm (see QuoteSheet printMode) so it fills
    an exact A4 page regardless of OS display scaling or printer DPI. */
-#print-root {
+#print-root,
+#print-root-admin {
   position: fixed;
   left: -10000px;
   top: 0;

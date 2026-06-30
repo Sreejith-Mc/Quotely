@@ -117,10 +117,19 @@ export default function QuoteSheet({ data, printMode }) {
             <span style={{ fontSize: 13, fontWeight: 700, color: tpl.acc }}>Grand Total</span>
             <span style={{ fontFamily: tpl.mono, fontSize: 17, fontWeight: 700, color: tpl.acc }}>{data.grandTotal}</span>
           </div>
+          {data.showProfit && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, padding: '11px 16px', background: 'rgba(124,24,37,0.07)', border: '1px dashed rgba(124,24,37,0.4)', borderRadius: 10 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#7c1825' }}>Profit ({data.marginPercent}% margin)</span>
+              <span style={{ fontFamily: tpl.mono, fontSize: 15, fontWeight: 700, color: '#7c1825' }}>{data.profit}</span>
+            </div>
+          )}
           <div style={{ marginTop: 10, textAlign: 'right' }}>
             <div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#9aa39c', fontWeight: 700, marginBottom: 3 }}>Amount in words</div>
             <div style={{ fontSize: 11, color: '#16201b', lineHeight: 1.5, fontStyle: 'italic' }}>{data.grandWords}</div>
           </div>
+          {data.showProfit && (
+            <div style={{ marginTop: 8, textAlign: 'right', fontSize: 9, color: '#9aa39c', fontStyle: 'italic' }}>Admin copy — profit shown for internal use only.</div>
+          )}
         </div>
       </div>
 

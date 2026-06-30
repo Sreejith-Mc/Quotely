@@ -3,7 +3,7 @@ import { buildTpl } from '../components/templates.js';
 
 // Builds the single `data` object the QuoteSheet component renders from — shared by
 // the inline live preview, the PDF overlay, and print so they can never drift apart.
-export function buildSheetData({ company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms, templateId, accent, quoteNo, date, salesStaff }) {
+export function buildSheetData({ company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms, templateId, accent, quoteNo, date, salesStaff, showProfit, margin }) {
   const cgstLabel = `CGST (${tax.cgst}%)`;
   const sgstLabel = `SGST (${tax.sgst}%)`;
   // "Show rate" off → a minimal quote: only #, Item, Qty in the table and only the
@@ -28,6 +28,11 @@ export function buildSheetData({ company, cust, items, tax, manualGst, showAmoun
     return { idx: i + 1, name: it.name || 'Item', qty: it.qty, warranty: it.warranty || '—', rate: money(c.rate), cgst: money(c.cgst), sgst: money(c.sgst), total: money(c.total) };
   });
 
+  // Profit = the margin % applied to the pre-GST subtotal. Only ever rendered on the
+  // admin export (showProfit), never on the normal download/print.
+  const marginPct = Number(margin) || 0;
+  const profitVal = subBase * marginPct / 100;
+
   return {
     company: {
       logoSrc: company.logo_url, name: company.name, address: company.address, sealName: company.seal_name, sealUrl: company.seal_url,
@@ -45,7 +50,8 @@ export function buildSheetData({ company, cust, items, tax, manualGst, showAmoun
     gridCols, tpl, cgstLabel, sgstLabel,
     subtotal: money(subBase), cgstTotal: money(cgstT), sgstTotal: money(sgstT), grandTotal: money(grand),
     grandWords: grandTotalWords(grand),
+    showProfit: !!showProfit, marginPercent: marginPct, profit: money(profitVal),
     terms: terms.split('\n').filter((x) => x.trim()).map((t) => ({ text: t })),
-    _totals: { subBase, cgstT, sgstT, grand },
+    _totals: { subBase, cgstT, sgstT, grand, profit: profitVal },
   };
 }
