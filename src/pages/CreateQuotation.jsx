@@ -458,38 +458,67 @@ export default function CreateQuotation() {
 
       {/* RIGHT (desktop) / BOTTOM (mobile): quote template preview */}
       <div style={{ background: 'var(--bg)', borderLeft: isMobile ? 'none' : '1px solid var(--border)', borderTop: isMobile ? '1px solid var(--border)' : 'none', display: 'flex', flexDirection: 'column', maxHeight: isMobile ? 'none' : 'calc(100vh - 62px)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isMobile ? '12px 16px' : '14px 22px', borderBottom: '1px solid var(--border)', background: 'var(--panel)', flexWrap: 'wrap', gap: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-            <span style={{ font: '700 13px Manrope', color: 'var(--ink)' }}>Live Preview</span>
-            <label style={checkLabelStyle}>
-              <input type="checkbox" checked={showRate} onChange={(e) => setShowRate(e.target.checked)} style={checkboxStyle} />
-              <span style={checkTextStyle}>Show rate</span>
-            </label>
-            <label style={{ ...checkLabelStyle, opacity: showRate ? 1 : 0.45, cursor: showRate ? 'pointer' : 'not-allowed' }}>
-              <input type="checkbox" checked={showAmount} disabled={!showRate} onChange={(e) => setShowAmount(e.target.checked)} style={checkboxStyle} />
-              <span style={checkTextStyle}>Show amount</span>
-            </label>
-            <Tooltip label="Show each item's warranty period on the quote (works even when rate is off)">
+        {(() => {
+          // Same controls, two layouts: desktop keeps the single inline row; mobile
+          // stacks a title+Actions row over a tidy 2-column grid of checkboxes.
+          const checks = (
+            <>
               <label style={checkLabelStyle}>
-                <input type="checkbox" checked={showWarranty} onChange={(e) => setShowWarranty(e.target.checked)} style={checkboxStyle} />
-                <span style={checkTextStyle}>Show warranty</span>
+                <input type="checkbox" checked={showRate} onChange={(e) => setShowRate(e.target.checked)} style={checkboxStyle} />
+                <span style={checkTextStyle}>Show rate</span>
               </label>
-            </Tooltip>
-            <Tooltip label="Allow the quotation to span multiple pages">
-              <label style={checkLabelStyle}>
-                <input type="checkbox" checked={multiPage} onChange={(e) => setMultiPage(e.target.checked)} style={checkboxStyle} />
-                <span style={checkTextStyle}>Multi-page</span>
+              <label style={{ ...checkLabelStyle, opacity: showRate ? 1 : 0.45, cursor: showRate ? 'pointer' : 'not-allowed' }}>
+                <input type="checkbox" checked={showAmount} disabled={!showRate} onChange={(e) => setShowAmount(e.target.checked)} style={checkboxStyle} />
+                <span style={checkTextStyle}>Show amount</span>
               </label>
-            </Tooltip>
-          </div>
-          <ActionsMenu
-            canProfit={canProfit}
-            onPreview={() => setPdfOpen(true)}
-            onPrint={doPrint}
-            onDownload={downloadPdf}
-            onAdminExport={downloadAdminPdf}
-          />
-        </div>
+              <Tooltip label="Show each item's warranty period on the quote (works even when rate is off)">
+                <label style={checkLabelStyle}>
+                  <input type="checkbox" checked={showWarranty} onChange={(e) => setShowWarranty(e.target.checked)} style={checkboxStyle} />
+                  <span style={checkTextStyle}>Show warranty</span>
+                </label>
+              </Tooltip>
+              <Tooltip label="Allow the quotation to span multiple pages">
+                <label style={checkLabelStyle}>
+                  <input type="checkbox" checked={multiPage} onChange={(e) => setMultiPage(e.target.checked)} style={checkboxStyle} />
+                  <span style={checkTextStyle}>Multi-page</span>
+                </label>
+              </Tooltip>
+            </>
+          );
+          const actions = (
+            <ActionsMenu
+              canProfit={canProfit}
+              onPreview={() => setPdfOpen(true)}
+              onPrint={doPrint}
+              onDownload={downloadPdf}
+              onAdminExport={downloadAdminPdf}
+            />
+          );
+          const title = <span style={{ font: '700 13px Manrope', color: 'var(--ink)' }}>Live Preview</span>;
+
+          if (isMobile) {
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '12px 16px', borderBottom: '1px solid var(--border)', background: 'var(--panel)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+                  {title}
+                  {actions}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 12px' }}>
+                  {checks}
+                </div>
+              </div>
+            );
+          }
+          return (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 22px', borderBottom: '1px solid var(--border)', background: 'var(--panel)', flexWrap: 'wrap', gap: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+                {title}
+                {checks}
+              </div>
+              {actions}
+            </div>
+          );
+        })()}
         <div ref={outerRef} style={isMobile
           ? { height: '78vh', overflow: 'hidden', padding: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }
           : { flex: 1, overflow: 'hidden', padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
