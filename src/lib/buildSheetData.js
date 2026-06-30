@@ -3,7 +3,7 @@ import { buildTpl } from '../components/templates.js';
 
 // Builds the single `data` object the QuoteSheet component renders from — shared by
 // the inline live preview, the PDF overlay, and print so they can never drift apart.
-export function buildSheetData({ company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms, templateId, accent, quoteNo, date, salesStaff, showProfit, margin, roundOff, showRoundOff }) {
+export function buildSheetData({ company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms, templateId, accent, quoteNo, date, salesStaff, salesStaffPhone, showProfit, margin, roundOff, showRoundOff }) {
   const cgstLabel = `CGST (${tax.cgst}%)`;
   const sgstLabel = `SGST (${tax.sgst}%)`;
   // "Show rate" off → a minimal quote: only #, Item, Qty in the table and only the
@@ -46,7 +46,7 @@ export function buildSheetData({ company, cust, items, tax, manualGst, showAmoun
       phone: company.phone, email: company.email, website: company.website, gst: company.gst,
       hasPhone: !!company.phone, hasEmail: !!company.email, hasWebsite: !!company.website, hasGst: !!company.gst,
     },
-    quoteNo, date, salesStaff,
+    quoteNo, date, salesStaff, salesStaffPhone: salesStaffPhone || '',
     customer: {
       name: cust.name || '—', company: cust.company, address: cust.address, phone: cust.phone, email: cust.email,
       hasCompany: !!cust.company, hasPhone: !!cust.phone, hasEmail: !!cust.email,

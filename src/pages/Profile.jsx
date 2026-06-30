@@ -10,12 +10,14 @@ export default function Profile() {
   const { profile, refreshProfile } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: profile?.name || '', email: profile?.email || '', phone: profile?.phone || '' });
+  const [form, setForm] = useState({ name: profile?.name || '', email: profile?.email || '', phone: profile?.phone || '', show_phone_on_quote: !!profile?.show_phone_on_quote });
   const [saving, setSaving] = useState(false);
 
   async function save() {
     setSaving(true);
-    const { error } = await supabase.from('profiles').update({ name: form.name, phone: form.phone }).eq('id', profile.id);
+    // Only keep the "show on quote" flag meaningful while a number is present.
+    const showPhone = !!form.phone.trim() && form.show_phone_on_quote;
+    const { error } = await supabase.from('profiles').update({ name: form.name, phone: form.phone, show_phone_on_quote: showPhone }).eq('id', profile.id);
     setSaving(false);
     if (error) {
       toast('Could not save profile');
@@ -48,6 +50,12 @@ export default function Profile() {
             <input value={form.phone} onChange={(e) => setForm((s) => ({ ...s, phone: e.target.value }))} style={fieldStyle} />
           </div>
         </div>
+        {form.phone.trim() && (
+          <label style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer', userSelect: 'none' }}>
+            <input type="checkbox" checked={form.show_phone_on_quote} onChange={(e) => setForm((s) => ({ ...s, show_phone_on_quote: e.target.checked }))} style={{ width: 16, height: 16, accentColor: 'var(--green)', cursor: 'pointer' }} />
+            <span style={{ font: '600 12px Manrope', color: 'var(--ink-2)' }}>Show my name &amp; number on quotations I create</span>
+          </label>
+        )}
         <button onClick={save} disabled={saving} style={{ border: 'none', background: 'var(--green)', color: '#fff', cursor: 'pointer', font: '700 13px Manrope', padding: 11, borderRadius: 11, marginTop: 4, opacity: saving ? 0.7 : 1 }}>
           {saving ? 'Saving…' : 'Save profile'}
         </button>

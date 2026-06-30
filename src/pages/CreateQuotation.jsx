@@ -88,12 +88,16 @@ export default function CreateQuotation() {
       setMargin(data.margin_percent != null ? String(data.margin_percent) : '');
       setRoundOff(data.round_off ? String(data.round_off) : '');
       setShowRoundOff(!!data.show_round_off);
-      setEditMeta({ number: data.number, date: data.date, status: data.status, salesName: data.sales_staff_name });
+      setEditMeta({ number: data.number, date: data.date, status: data.status, salesName: data.sales_staff_name, salesPhone: data.sales_staff_phone || '' });
     })();
     return () => { cancelled = true; };
   }, [editId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const salesStaff = editId ? (editMeta?.salesName || 'Not Assigned') : (loggedIn && profile ? profile.name : 'Not Assigned');
+  // Phone only appears when the staff member opted in (Profile → "Show my name & number").
+  const salesStaffPhone = editId
+    ? (editMeta?.salesPhone || '')
+    : (loggedIn && profile?.show_phone_on_quote && profile?.phone ? profile.phone : '');
   const quoteNoPreview = editId && editMeta
     ? editMeta.number
     : formatQuoteNumber(numbering.prefix, numbering.next_number, numbering.pad);
@@ -143,14 +147,14 @@ export default function CreateQuotation() {
 
   const sheetData = useMemo(() => buildSheetData({
     company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms: terms.content || '', templateId: template.selected, accent: template.accent,
-    quoteNo: quoteNoPreview, date: today, salesStaff, roundOff, showRoundOff,
-  }), [company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms, template, quoteNoPreview, today, salesStaff, roundOff, showRoundOff]);
+    quoteNo: quoteNoPreview, date: today, salesStaff, salesStaffPhone, roundOff, showRoundOff,
+  }), [company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms, template, quoteNoPreview, today, salesStaff, salesStaffPhone, roundOff, showRoundOff]);
 
   // Admin-only copy — identical to the customer sheet but with the profit line shown.
   const adminSheetData = useMemo(() => buildSheetData({
     company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms: terms.content || '', templateId: template.selected, accent: template.accent,
-    quoteNo: quoteNoPreview, date: today, salesStaff, roundOff, showRoundOff, showProfit: true, margin,
-  }), [company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms, template, quoteNoPreview, today, salesStaff, roundOff, showRoundOff, margin]);
+    quoteNo: quoteNoPreview, date: today, salesStaff, salesStaffPhone, roundOff, showRoundOff, showProfit: true, margin,
+  }), [company, cust, items, tax, manualGst, showAmount, showRate, showWarranty, terms, template, quoteNoPreview, today, salesStaff, salesStaffPhone, roundOff, showRoundOff, margin]);
 
   useFitSheet(outerRef, wrapRef, innerRef, { maxScale: 1.05, margin: 36 });
 
@@ -277,6 +281,7 @@ export default function CreateQuotation() {
       number,
       sales_staff_id: session.user.id,
       sales_staff_name: profile?.name || 'Not Assigned',
+      sales_staff_phone: salesStaffPhone,
       ...fields,
     });
     setSaving(false);

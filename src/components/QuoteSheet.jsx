@@ -41,7 +41,10 @@ export default function QuoteSheet({ data, printMode }) {
             <div style={{ color: '#9aa39c', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Date</div>
             <div style={{ fontFamily: tpl.mono, color: '#16201b' }}>{data.date}</div>
             <div style={{ color: '#9aa39c', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Staff</div>
-            <div style={{ fontWeight: 600, color: '#16201b' }}>{data.salesStaff}</div>
+            <div style={{ fontWeight: 600, color: '#16201b' }}>
+              {data.salesStaff}
+              {data.salesStaffPhone && <div style={{ fontWeight: 500, fontSize: 10, color: '#6b766e', marginTop: 2 }}>{data.salesStaffPhone}</div>}
+            </div>
           </div>
         </div>
       </div>

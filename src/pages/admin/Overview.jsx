@@ -85,9 +85,9 @@ export default function Overview() {
     <>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 14 }}>
         {stats.map((st) => (
-          <div key={st.label} style={{ background: 'var(--panel)', border: '1px solid var(--border)', borderRadius: 16, padding: 18, boxShadow: 'var(--shadow)' }}>
+          <div key={st.label} style={{ background: 'var(--panel)', border: '1px solid var(--border)', borderRadius: 16, padding: 18, boxShadow: 'var(--shadow)', minWidth: 0, overflow: 'hidden' }}>
             <div style={{ font: '600 11px Manrope', color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{st.label}</div>
-            <div style={{ font: "800 26px 'JetBrains Mono'", color: 'var(--ink)', margin: '8px 0 2px' }}>{st.value}</div>
+            <div style={{ font: "800 26px 'JetBrains Mono'", color: 'var(--ink)', margin: '8px 0 2px', lineHeight: 1.15, overflowWrap: 'anywhere', wordBreak: 'break-word' }}>{st.value}</div>
             {st.delta && <div style={{ font: '600 11px Manrope', color: 'var(--green)' }}>{st.delta}</div>}
           </div>
         ))}
